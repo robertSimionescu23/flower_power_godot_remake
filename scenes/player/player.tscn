@@ -90,6 +90,8 @@ animations = [{
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=1970844428]
 script = ExtResource("2_g2els")
+JumpBufferTimerDuration = 1.0
+metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1838315505]
 position = Vector2(0, 1.5)
@@ -99,3 +101,13 @@ shape = SubResource("RectangleShape2D_5vmv2")
 sprite_frames = SubResource("SpriteFrames_5vmv2")
 animation = &"idle"
 frame_progress = 0.9071109
+
+[node name="JumpBufferTimer" type="Timer" parent="." unique_id=1469793793]
+wait_time = 0.1
+one_shot = true
+
+[node name="WallJumpDurationTimer" type="Timer" parent="." unique_id=74752916]
+wait_time = 0.2
+one_shot = true
+
+[connection signal="timeout" from="WallJumpDurationTimer" to="." method="OnWallJumpDurationTimerTimeout"]

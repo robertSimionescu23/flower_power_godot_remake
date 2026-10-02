@@ -9,13 +9,22 @@ public partial class CharacterBody2d : CharacterBody2D
     public  float WallSlideSpeed = 200f;
     AnimatedSprite2D AnimatedSprite;
 
+    [Export]
+    float JumpBufferTimerDuration = 0.1f;
+
+    Timer JumpBufferTimer;
+    Timer WallJumpDurationTimer;
     Vector2 localGravity ;
+
+    private bool IsWallJumping = false;
 
     public override void _Ready(){
         AnimatedSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
         AnimatedSprite.Play();
 
         localGravity = GetGravity();
+        JumpBufferTimer = GetNode<Timer>("JumpBufferTimer");
+        WallJumpDurationTimer = GetNode<Timer>("WallJumpDurationTimer");
     }
 
     public override void _PhysicsProcess(double delta)
@@ -23,19 +32,12 @@ public partial class CharacterBody2d : CharacterBody2D
         Vector2 velocity = Velocity;
 
         // Add the gravity.
-        if (!IsOnFloor() && !IsOnWallOnly())
+        if (!IsOnFloor())
         {
             velocity +=  GetGravity() * (float)delta;
         }
 
-        if(Input.IsActionJustReleased("jump") && velocity.Y < 0)
-            velocity.Y /= 5;
 
-        // Handle Jump.
-        if (Input.IsActionJustPressed("jump") && IsOnFloor())
-        {
-            velocity.Y = JumpVelocity;
-        }
 
         // Get the input direction and handle the movement/deceleration.
         // As good practice, you should replace UI actions with custom gameplay actions.
@@ -61,15 +63,16 @@ public partial class CharacterBody2d : CharacterBody2D
                 AnimatedSprite.Animation = "idle";
         }
 
-        if (direction != 0)
-        {
-            velocity.X = direction * Speed;
+        if(!IsWallJumping){
+            if (direction != 0)
+            {
+                velocity.X = direction * Speed;
+            }
+            else
+            {
+                velocity.X = Mathf.MoveToward(Velocity.X, 0, Speed);
+            }
         }
-        else
-        {
-            velocity.X = Mathf.MoveToward(Velocity.X, 0, Speed);
-        }
-
         if (!IsOnFloor())
         {
             if(velocity.Y > 0)
@@ -78,11 +81,48 @@ public partial class CharacterBody2d : CharacterBody2D
                 AnimatedSprite.Animation = "jump";
         }
 
-        if(IsOnWallOnly() && velocity.X !=0){
-            velocity.Y = WallSlideSpeed;
+        // Handle Jump.
+        if(Input.IsActionJustPressed("jump"))
+        {
+            JumpBufferTimer.Start(JumpBufferTimerDuration);
         }
+
+        if (IsOnFloor() && JumpBufferTimer.TimeLeft > 0)
+        {
+            velocity.Y = JumpVelocity;
+            JumpBufferTimer.Stop();
+        }
+        else if (IsOnWallOnly() && JumpBufferTimer.TimeLeft > 0)
+        {
+            IsWallJumping = true;
+            WallJumpDurationTimer.Start();
+            JumpBufferTimer      .Stop ();
+
+            var jumpDirection = GetWallNormal().X < 0? 1 : -1;
+            var diagonalJump = new Vector2(jumpDirection,1);
+            GD.Print(diagonalJump);
+            velocity = diagonalJump * JumpVelocity;
+        }
+
+        if(Input.IsActionJustReleased("jump") && velocity.Y < 0)
+            velocity.Y /= 5;
+
+        //Grip to wall based on direction
+        if(IsOnWallOnly()){
+            if ((Input.IsActionPressed("move_right") && GetWallNormal().X < 0) || (Input.IsActionPressed("move_left") && GetWallNormal().X > 0) )
+                   velocity.Y = WallSlideSpeed;
+        }
+
+        //TODO: Add wall sliding cooldown
+
 
         Velocity = velocity;
         MoveAndSlide();
     }
+
+    public void OnWallJumpDurationTimerTimeout()
+    {
+        IsWallJumping = false;
+    }
+
 }
