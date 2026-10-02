@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nuxh32gs2r02"
-path="res://.godot/imported/Rocks_new_arranged.png-091d19ed0e7af73a138e9c0061d1d86c.ctex"
+uid="uid://dji87vegepupa"
+path="res://.godot/imported/jump.png-695d33639e35e024c8003771673e09df.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://graphics/Rocks_new_arranged.png"
-dest_files=["res://.godot/imported/Rocks_new_arranged.png-091d19ed0e7af73a138e9c0061d1d86c.ctex"]
+source_file="res://graphics/player/jump.png"
+dest_files=["res://.godot/imported/jump.png-695d33639e35e024c8003771673e09df.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://p07whpvwvsra"
-path="res://.godot/imported/Rocks_new.png-1867c9f5ff038ce2b682c936f28624bd.ctex"
+uid="uid://by2y4og2ippk4"
+path="res://.godot/imported/run+idle.png-9b027f29f4780990cd4e8d598f295c61.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://graphics/Rocks_new.png"
-dest_files=["res://.godot/imported/Rocks_new.png-1867c9f5ff038ce2b682c936f28624bd.ctex"]
+source_file="res://graphics/player/run+idle.png"
+dest_files=["res://.godot/imported/run+idle.png-9b027f29f4780990cd4e8d598f295c61.ctex"]
 
 [params]
 
