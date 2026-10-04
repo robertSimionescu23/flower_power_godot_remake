@@ -90,7 +90,6 @@ animations = [{
 
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=1970844428]
 script = ExtResource("2_g2els")
-JumpBufferTimerDuration = 1.0
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1838315505]
@@ -110,4 +109,14 @@ one_shot = true
 wait_time = 0.2
 one_shot = true
 
+[node name="WallClimbEnabledTimer" type="Timer" parent="." unique_id=522193975]
+wait_time = 0.2
+one_shot = true
+
+[node name="DashDurationTimer" type="Timer" parent="." unique_id=1429618969]
+wait_time = 0.05
+one_shot = true
+
 [connection signal="timeout" from="WallJumpDurationTimer" to="." method="OnWallJumpDurationTimerTimeout"]
+[connection signal="timeout" from="WallClimbEnabledTimer" to="." method="OnWallClimbEnabledTimerTimeout"]
+[connection signal="timeout" from="DashDurationTimer" to="." method="OnDashDurationTimeout"]
