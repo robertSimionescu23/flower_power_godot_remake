@@ -12,6 +12,7 @@ public partial class CharacterBody2d : CharacterBody2D
     [Export]
     public  float WallSlideSpeed = 200f;
     private AnimatedSprite2D AnimatedSprite;
+    public int Direction;
 
     private Timer _jumpBufferTimer;
     private Timer _wallJumpDurationTimer;
@@ -21,6 +22,7 @@ public partial class CharacterBody2d : CharacterBody2D
 
     private bool _isWallJumping = false;
     private bool _isDashing     = false;
+    private bool _canDash       = true;
 
     private int _lastPositiveDirectionUsed = 1;
 
@@ -53,26 +55,26 @@ public partial class CharacterBody2d : CharacterBody2D
             AnimatedSprite.Animation = velocity.Y > 0? "fall" : "jump";
         }
 
-        // Get the input direction and handle the movement/deceleration.
+        // Get the input Direction and handle the movement/deceleration.
         // As good practice, you should replace UI actions with custom gameplay actions.
-        int _direction;
+
 
         if (Input.IsActionPressed("move_right")){
-            _direction = 1;
+            Direction = 1;
             _lastPositiveDirectionUsed = 1;
             AnimatedSprite.FlipH = false;
         }
         else if (Input.IsActionPressed("move_left")){
-            _direction = -1;
+            Direction = -1;
             _lastPositiveDirectionUsed = -1;
             AnimatedSprite.FlipH = true;
         }
         else{
-            _direction = 0;
+            Direction = 0;
         }
 
         if(IsOnFloor())
-            AnimatedSprite.Animation = _direction == 0? "idle" : "running";
+            AnimatedSprite.Animation = Direction == 0? "idle" : "running";
 
 
         //Add wall sliding cooldown
@@ -82,12 +84,12 @@ public partial class CharacterBody2d : CharacterBody2D
             _wallClimbEnabledTimer.Start();
 
         //Prevent "running" into walls
-        if(IsOnFloor() && IsOnWall() && _direction != 0)
+        if(IsOnFloor() && IsOnWall() && Direction != 0)
             AnimatedSprite.Animation = "idle";
 
         if(!_isWallJumping && !_isDashing)
-            velocity.X = _direction != 0 ?
-                _direction * Speed                     :
+            velocity.X = Direction != 0 ?
+                Direction * Speed                     :
                 Mathf.MoveToward(Velocity.X, 0, Speed);
 
         // Handle Jump.
@@ -105,7 +107,7 @@ public partial class CharacterBody2d : CharacterBody2D
         if(Input.IsActionJustReleased("jump") && velocity.Y < 0)
             velocity.Y /= 5;
 
-        //Grip to wall based on _direction
+        //Grip to wall based on Direction
         if(IsOnWallOnly()){
             var isPressingWallRight = Input.IsActionPressed("move_right") && GetWallNormal().X < 0f;
             var isPressingWallLeft  = Input.IsActionPressed("move_left")  && GetWallNormal().X > 0f;
@@ -122,25 +124,25 @@ public partial class CharacterBody2d : CharacterBody2D
                 _wallJumpDurationTimer.Start();
                 _jumpBufferTimer      .Stop ();
 
-                var jump_Direction = isPressingWallRight? 1 : -1; //Change jump _direction based on where the wall is
-                var diagonalJump = new Vector2(jump_Direction, 2).Normalized();
+                var jumpDirection = isPressingWallRight? 1 : -1; //Change jump Direction based on where the wall is
+                var diagonalJump = new Vector2(jumpDirection, 2).Normalized();
 
                 velocity = diagonalJump * JumpVelocity;
             }
         }
 
-        //TODO: Add dash cooldown
-
-        if(Input.IsActionJustPressed("dash")){
+        if(Input.IsActionJustPressed("dash") && !_isDashing && _canDash && !IsOnWall()){
             _isDashing = true;
+            _canDash   = false;
             _dashDurationTimer.Start();
         };
 
         if(_isDashing){
             velocity = new Vector2(_lastPositiveDirectionUsed * DashStrength, 0);
-
         }
-        GD.Print(_isDashing);
+
+        if(IsOnFloor())
+            _canDash = true;
 
 
         Velocity = velocity;
