@@ -10,10 +10,12 @@ public partial class Camera2d : Camera2D
 
     private Vector2 _targetPos;
 
-    [Export]
     private float _horizontalMargin = 30f;
     [Export]
+    private float _defaultHorizontalMargin = 30f;
     private float  _verticalMargin = 30f;
+    [Export]
+    private float _defaultVerticalMargin = 30f;
 
     [Export]
     private float _lookAheadDistance = 200f;
@@ -62,9 +64,11 @@ public partial class Camera2d : Camera2D
         var playerGlobalPos = _player.GlobalPosition;
 
 
-        var lookAheadOffset = _player.Direction *_lookAheadDistance;
+        var lookAheadOffset = _player.IsClimbing? 0: _player.Direction *_lookAheadDistance;
         _currLookOffset = Mathf.MoveToward(_currLookOffset, lookAheadOffset, _dynamicLookAheadSpeed * (float) delta);
 
+        _verticalMargin = _player.IsClimbing? _defaultVerticalMargin * 3: _defaultVerticalMargin;
+        _horizontalMargin = _player.IsClimbing?  _defaultHorizontalMargin * 3: _defaultHorizontalMargin;
 
         if(Mathf.Abs(playerGlobalPos.X - Position.X) > _horizontalMargin && !_isMoving){
             _isMoving = true;
@@ -74,18 +78,24 @@ public partial class Camera2d : Camera2D
             _isMoving = true;
         }
 
+
+        if((_player.Velocity.X == 0 || _player.IsClimbing) && _isMoving )
+        {
+            _isMoving = false;
+            _targetPos.Y = playerGlobalPos.Y;
+            _targetPos.X = playerGlobalPos.X;
+        }
+
         if (_isMoving)
         {
             _targetPos.Y = playerGlobalPos.Y;
             _targetPos.X = playerGlobalPos.X + _currLookOffset;
         }
 
-        if(_player.Velocity.X == 0 && _isMoving)
-        {
-            _isMoving = false;
-            _targetPos.Y = playerGlobalPos.Y;
-            _targetPos.X = playerGlobalPos.X;
-        }
+
+
+        // GD.Print(_targetPos);
+
 
         var distance    = Position.DistanceTo(_targetPos);
 

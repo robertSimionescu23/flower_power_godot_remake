@@ -18,7 +18,6 @@ position = Vector2(234, 63)
 editor_draw_limits = true
 editor_draw_drag_margin = true
 script = ExtResource("4_jyhfs")
-_horizontalMargin = 60.0
 _lookAheadDistance = 150.0
 _dynamicLookAheadSpeed = 150.0
 _maxDistance = 350.0

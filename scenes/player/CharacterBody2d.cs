@@ -26,6 +26,8 @@ public partial class CharacterBody2d : CharacterBody2D
 
     private int _lastPositiveDirectionUsed = 1;
 
+    public bool IsClimbing = false;
+
 
 
     //Make wallclimbing possible X seconds after jumping to prevent weird behavior at corners
@@ -73,8 +75,10 @@ public partial class CharacterBody2d : CharacterBody2D
             Direction = 0;
         }
 
-        if(IsOnFloor())
+        if(IsOnFloor()){
             AnimatedSprite.Animation = Direction == 0? "idle" : "running";
+            IsClimbing = false;
+        }
 
 
         //Add wall sliding cooldown
@@ -111,6 +115,7 @@ public partial class CharacterBody2d : CharacterBody2D
         if(IsOnWallOnly()){
             var isPressingWallRight = Input.IsActionPressed("move_right") && GetWallNormal().X < 0f;
             var isPressingWallLeft  = Input.IsActionPressed("move_left")  && GetWallNormal().X > 0f;
+            IsClimbing = true;
 
             //If hugging a wall (on the left or on the right) while not grounded, slide on wall
             if ((isPressingWallRight || isPressingWallLeft) && _canWallSlide)
