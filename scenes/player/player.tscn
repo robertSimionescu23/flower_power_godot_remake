@@ -117,6 +117,15 @@ one_shot = true
 wait_time = 0.1
 one_shot = true
 
+[node name="FreeFallingTimer" type="Timer" parent="." unique_id=1887751345]
+wait_time = 0.3
+one_shot = true
+
+[node name="DashCoolDownTimer" type="Timer" parent="." unique_id=1040883868]
+wait_time = 0.5
+one_shot = true
+
 [connection signal="timeout" from="WallJumpDurationTimer" to="." method="OnWallJumpDurationTimerTimeout"]
 [connection signal="timeout" from="WallClimbEnabledTimer" to="." method="OnWallClimbEnabledTimerTimeout"]
 [connection signal="timeout" from="DashDurationTimer" to="." method="OnDashDurationTimeout"]
+[connection signal="timeout" from="FreeFallingTimer" to="." method="OnFreeFallingTimerTimeout"]

@@ -18,10 +18,12 @@ public partial class Camera2d : Camera2D
     private float _defaultVerticalMargin = 30f;
 
     [Export]
-    private float _lookAheadDistance = 200f;
+    private float _lookAheadHorizontalDistance = 200f;
+    [Export]
+    private float _lookAheadVerticalDistance = 200f;
+    private float _currHorizontalLookOffset        = 0f;
     [Export]
     private float _dynamicLookAheadSpeed = 50f; //How fast the lookahead distance changes abed on time moving
-    private float _currLookOffset        = 0f;
     [Export]
     private float _defaultFollowSpeed = 300f;
     private float _followSpeed;
@@ -64,8 +66,9 @@ public partial class Camera2d : Camera2D
         var playerGlobalPos = _player.GlobalPosition;
 
 
-        var lookAheadOffset = _player.IsClimbing? 0: _player.Direction *_lookAheadDistance;
-        _currLookOffset = Mathf.MoveToward(_currLookOffset, lookAheadOffset, _dynamicLookAheadSpeed * (float) delta);
+        var lookAheadHorizontalOffset = _player.IsClimbing? 0: _player.Direction *_lookAheadHorizontalDistance;
+        var lookAheadVerticalOffset   = _player.IsFalling? _lookAheadVerticalDistance: 0; //TODO: Make a separate lookahead vertical variable
+        _currHorizontalLookOffset = Mathf.MoveToward(_currHorizontalLookOffset, lookAheadHorizontalOffset, _dynamicLookAheadSpeed * (float) delta);
 
         _verticalMargin = _player.IsClimbing? _defaultVerticalMargin * 3: _defaultVerticalMargin;
         _horizontalMargin = _player.IsClimbing?  _defaultHorizontalMargin * 3: _defaultHorizontalMargin;
@@ -88,20 +91,15 @@ public partial class Camera2d : Camera2D
 
         if (_isMoving)
         {
-            _targetPos.Y = playerGlobalPos.Y;
-            _targetPos.X = playerGlobalPos.X + _currLookOffset;
+            _targetPos.Y = playerGlobalPos.Y + lookAheadVerticalOffset;
+            _targetPos.X = playerGlobalPos.X + _currHorizontalLookOffset;
         }
-
-
-
-        // GD.Print(_targetPos);
-
 
         var distance    = Position.DistanceTo(_targetPos);
 
         _followSpeed = Mathf.Lerp(
             _defaultFollowSpeed,
-            _defaultFollowSpeed * 2,
+            _defaultFollowSpeed * 2.5f,
             Mathf.Clamp(distance/_maxDistance, 0f, 1f)
         );
 
