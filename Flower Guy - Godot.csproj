@@ -5,4 +5,8 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>FlowerGuyGodot</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="script_templates/**/*.cs" />
+    <None Include="script_templates/**/*" />
+  </ItemGroup>
 </Project>

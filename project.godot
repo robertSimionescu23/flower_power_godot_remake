@@ -28,6 +28,10 @@ window/stretch/scale_mode="integer"
 
 project/assembly_name="Flower Guy - Godot"
 
+[editor]
+
+script/templates_search_path="res://script_templates/"
+
 [input]
 
 jump={

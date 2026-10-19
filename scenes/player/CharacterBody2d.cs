@@ -76,8 +76,33 @@ public partial class CharacterBody2d : CharacterBody2D
             return JumpVelocity;
         }
 
-        return YVelocity;
+        if(Input.IsActionJustReleased("jump") && YVelocity < 0)
+           return YVelocity /= 5;
 
+        return YVelocity;
+    }
+
+
+    public Vector2 HandleDash(Vector2 velocity)
+    {
+
+        if(Input.IsActionJustPressed("dash") && !_isDashing && _canDash && !IsOnWall()){
+            if(_dashCoolDownTimer.TimeLeft == 0){
+                _isDashing = true;
+                _canDash   = false;
+                _dashDurationTimer.Start();
+                _dashCoolDownTimer.Start();
+            }
+        };
+
+        if(_isDashing){
+            return new Vector2(_lastPositiveDirectionUsed * DashStrength, 0);
+        }
+
+        if(IsOnFloor())
+            _canDash = true;
+
+        return velocity;
     }
 
     public float HandleHorizontalMovement(float XVelocity)
@@ -102,32 +127,44 @@ public partial class CharacterBody2d : CharacterBody2D
             return Mathf.MoveToward(XVelocity, 0, 50f); //TODO: Add variable for stop speed
 
         return XVelocity;
-
     }
 
-    public override void _PhysicsProcess(double delta)
+    public void HandleAnimations(Vector2 velocity)
     {
-        Vector2 velocity = Velocity;
-
-        // Add the gravity.
-        velocity   = HandleGravity           (delta, velocity);
-        velocity.Y = HandleJump              (velocity.Y);
-        velocity.X = HandleHorizontalMovement(velocity.X);
-
-
-
-        if (!IsOnFloor())
+         if (!IsOnFloor())
         {
             //Change animation based on velocity
             AnimatedSprite.Animation = velocity.Y > 0? "fall" : "jump";
         }
-
 
         if(IsOnFloor()){
             AnimatedSprite.Animation = Direction == 0? "idle" : "running";
             IsClimbing = false;
         }
 
+        //Prevent "running" into walls
+        if(IsOnFloor() && IsOnWall() && Direction != 0)
+            AnimatedSprite.Animation = "idle";
+
+    }
+
+    public Vector2 HandleMovement(double delta, Vector2 velocity)
+    {
+        velocity   = HandleGravity           (delta, velocity);
+        velocity   = HandleDash              (velocity);
+        velocity.Y = HandleJump              (velocity.Y);
+        velocity.X = HandleHorizontalMovement(velocity.X);
+
+        return velocity;
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        Vector2 velocity = Velocity;
+
+        velocity = HandleMovement(delta, velocity);
+
+        HandleAnimations(velocity);
 
         //Add wall sliding cooldown
         if(IsOnFloor())
@@ -135,12 +172,6 @@ public partial class CharacterBody2d : CharacterBody2D
         else if (_wallClimbEnabledTimer.IsStopped())
             _wallClimbEnabledTimer.Start();
 
-        //Prevent "running" into walls
-        if(IsOnFloor() && IsOnWall() && Direction != 0)
-            AnimatedSprite.Animation = "idle";
-
-        if(Input.IsActionJustReleased("jump") && velocity.Y < 0)
-            velocity.Y /= 5;
 
         //Grip to wall based on Direction
         if(IsOnWallOnly()){
@@ -168,22 +199,6 @@ public partial class CharacterBody2d : CharacterBody2D
         }
 
 
-        if(Input.IsActionJustPressed("dash") && !_isDashing && _canDash && !IsOnWall()){
-            if(_dashCoolDownTimer.TimeLeft == 0){
-                _isDashing = true;
-                _canDash   = false;
-                _dashDurationTimer.Start();
-                _dashCoolDownTimer.Start();
-            }
-        };
-
-
-        if(_isDashing){
-            velocity = new Vector2(_lastPositiveDirectionUsed * DashStrength, 0);
-        }
-
-        if(IsOnFloor())
-            _canDash = true;
 
         if(velocity.Y <= 0){
             IsFalling = false;
