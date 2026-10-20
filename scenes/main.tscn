@@ -2,10 +2,12 @@
 
 [ext_resource type="PackedScene" uid="uid://ryeekdqvwsxx" path="res://scenes/player/player.tscn" id="1_o5qli"]
 [ext_resource type="Script" uid="uid://cmbcp0jr6step" path="res://scenes/Main.cs" id="1_sugp2"]
-[ext_resource type="Script" uid="uid://rffk1ww8tfs3" path="res://scenes/GameCamera.cs" id="2_sugp2"]
+[ext_resource type="PackedScene" uid="uid://duftcy5kr3qr7" path="res://scenes/levels/level1/Level1.tscn" id="2_jyhfs"]
+[ext_resource type="Script" uid="uid://c0wpe3ks1iuuy" path="res://scenes/GameCamera.cs" id="2_sugp2"]
 
 [node name="Main" type="Node2D" unique_id=1257636000]
 script = ExtResource("1_sugp2")
+startLevel = ExtResource("2_jyhfs")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1540875752]
 position = Vector2(234, 63)

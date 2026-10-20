@@ -3,28 +3,43 @@ using System;
 
 public partial class Main : Node2D
 {
-    public PackedScene CurrLevel;
+    [Export]
+    public PackedScene startLevel;
+    public BaseLevel   CurrLevelInstance;
     public GameCamera ActiveCamera;
     public CharacterBody2d Player;
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         ActiveCamera = GetNode<GameCamera>("Camera2D");
-        CurrLevel = GD.Load<PackedScene>("res://scenes/levels/level1/Level1.tscn");
         Player = GetNode<CharacterBody2d>("Player");
 
-        //TODO: Tidy up and make level be chosen by text or otehr means
-        var level = CurrLevel.Instantiate<BaseLevel>();
-        ActiveCamera.AddSibling(level);
+        ChangeCurrentLevel(startLevel);
+    }
 
-        ActiveCamera.UpdateTilemapBounds(level);
+    private void ChangeCurrentLevel(PackedScene currLevel)
+    {
+        CurrLevelInstance?.QueueFree();
 
-        ActiveCamera.GlobalPosition = level.StartLocation;
-        Player.GlobalPosition = level.StartLocation;
+        CurrLevelInstance = currLevel.Instantiate<BaseLevel>();
+        //Connect the current level to the onLevelFish signal that is declared in it's parent
+        CurrLevelInstance.LevelChanged += OnLevelFinish;
+
+        ActiveCamera.AddSibling         (CurrLevelInstance);
+        ActiveCamera.UpdateTilemapBounds(CurrLevelInstance);
+        ActiveCamera.GlobalPosition   = CurrLevelInstance.StartLocation;
+
+        Player.GlobalPosition = CurrLevelInstance.StartLocation;
         Player.Visible = true;
+    }
 
-        GD.Print(level.StartLocation);
-        GD.Print(level.FinsihLocation);
+    public void OnLevelFinish(PackedScene level)
+    {
+        GD.Print("Level changes");
+        Player.Visible = false;
+
+        ChangeCurrentLevel(level);
+
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.
