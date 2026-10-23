@@ -23,12 +23,12 @@ public partial class GameCamera : Camera2D
     private float _lookAheadVerticalDistance = 200f;
     private float _currHorizontalLookOffset        = 0f;
     [Export]
-    private float _dynamicLookAheadSpeed = 50f; //How fast the lookahead distance changes abed on time moving
+    private float _dynamicLookAheadSpeed = 50f; //How fast the lookahead distance changes based on time moving
     [Export]
     private float _defaultFollowSpeed = 300f;
     private float _followSpeed;
     [Export]
-    private float _maxDistance = 300f;
+    private float _maxDistance = 300f; //Distance at which camera reaches max follow speedg
 
 
     private Vector2 _tileMapStart;
@@ -49,6 +49,9 @@ public partial class GameCamera : Camera2D
         // _screenSize = GetViewport().GetVisibleRect().Size;
         _targetPos   = Position;
         _followSpeed = _defaultFollowSpeed;
+
+        _horizontalMargin = _defaultHorizontalMargin;
+        _verticalMargin   = _defaultVerticalMargin;
 
         _player = GetNode<CharacterBody2d>("../Player"); //Handle getting tyhe player better
 
@@ -80,8 +83,6 @@ public partial class GameCamera : Camera2D
             var lookAheadVerticalOffset   = _player.IsFalling? _lookAheadVerticalDistance: 0; //TODO: Make a separate lookahead vertical variable
             _currHorizontalLookOffset = Mathf.MoveToward(_currHorizontalLookOffset, lookAheadHorizontalOffset, _dynamicLookAheadSpeed * (float) delta);
 
-            _verticalMargin = _player.IsClimbing? _defaultVerticalMargin * 3: _defaultVerticalMargin;
-            _horizontalMargin = _player.IsClimbing?  _defaultHorizontalMargin * 3: _defaultHorizontalMargin;
 
             if(Mathf.Abs(playerGlobalPos.X - Position.X) > _horizontalMargin && !_isMoving){
                 _isMoving = true;
@@ -114,7 +115,8 @@ public partial class GameCamera : Camera2D
             );
 
             Position = Position.MoveToward(_targetPos, _followSpeed * (float)delta);
-
         }
+
+
     }
 }

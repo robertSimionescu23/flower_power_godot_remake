@@ -38,7 +38,7 @@ public partial class Main : Node2D
         GD.Print("Level changes");
         Player.Visible = false;
 
-        ChangeCurrentLevel(level);
+        CallDeferred(nameof(ChangeCurrentLevel), level);
 
     }
 

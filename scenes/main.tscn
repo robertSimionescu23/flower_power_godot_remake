@@ -14,6 +14,8 @@ position = Vector2(234, 63)
 editor_draw_limits = true
 editor_draw_drag_margin = true
 script = ExtResource("2_sugp2")
+_defaultHorizontalMargin = 50.0
+_defaultVerticalMargin = 80.0
 
 [node name="Player" parent="." unique_id=1360087966 instance=ExtResource("1_o5qli")]
 visible = false

@@ -18,11 +18,14 @@ public partial class BaseLevel: Node2D
         StartLocation = GetNode<Area2D>("Start").GlobalPosition;
         FinsihLocation   = finish.GlobalPosition;
         finish.BodyEntered += OnFinishBodyEntered;
+
+        if (NextLevel == null)
+            GD.PushError(GetType().Name + ": No Next Level defined");
     }
 
     public void OnFinishBodyEntered(Node2D body)
     {
-        if(body is CharacterBody2D){
+        if(body is CharacterBody2D && NextLevel != null){
             GD.Print("Finished");
             EmitSignal(SignalName.LevelChanged, NextLevel);
         }
