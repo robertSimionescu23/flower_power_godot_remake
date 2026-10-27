@@ -145,6 +145,8 @@ metadata/_edit_group_ = true
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackShape" unique_id=1314172250]
 shape = SubResource("CircleShape2D_38sbo")
 
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=332126038]
+
 [connection signal="timeout" from="DashDurationTimer" to="." method="OnDashDurationTimeout"]
 [connection signal="timeout" from="FreeFallingTimer" to="." method="OnFreeFallingTimerTimeout"]
 [connection signal="timeout" from="AttackBufferTimer" to="." method="AttackBufferTimeout"]
