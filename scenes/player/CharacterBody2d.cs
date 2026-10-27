@@ -51,6 +51,19 @@ public partial class CharacterBody2d : CharacterBody2D
     private Timer _groundPoundActivationTimer;
     private Timer _wallClingBufferTimer;
 
+    private State PlayerState = State.Idle;
+
+    enum State
+    {
+        Idle,
+        Jumping,
+        Falling,
+        Dashing,
+        WallTraversing,
+        CeillingTraversing
+
+    }
+
 
     //Make wallclimbing possible X seconds after jumping to prevent weird behavior at corners
     private bool _canWallSlide = false;
