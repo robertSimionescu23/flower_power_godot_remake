@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dh7akf3ef18r2" path="res://graphics/player/idle.png" id="3_p47bc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5vmv2"]
-size = Vector2(12, 29)
+size = Vector2(18, 33)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qek5x"]
 atlas = ExtResource("2_p47bc")
@@ -95,12 +95,11 @@ radius = 23.42
 collision_layer = 2
 script = ExtResource("2_g2els")
 Speed = 200.0
-DashStrength = 400.0
-_canMove = false
+DashStrength = 350.0
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1838315505]
-position = Vector2(0, 1.5)
+position = Vector2(0, -0.5)
 shape = SubResource("RectangleShape2D_5vmv2")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1362058575]
@@ -141,7 +140,7 @@ visible = false
 modulate = Color(0.3986292, 0.00010887176, 0.3986263, 1)
 position = Vector2(0, -6)
 collision_layer = 2
-collision_mask = 5
+collision_mask = 4
 monitoring = false
 metadata/_edit_group_ = true
 
