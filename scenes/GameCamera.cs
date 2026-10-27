@@ -79,7 +79,7 @@ public partial class GameCamera : Camera2D
             var playerGlobalPos = _player.GlobalPosition;
 
 
-            var lookAheadHorizontalOffset = _player.IsClimbing? 0: _player.Direction *_lookAheadHorizontalDistance;
+            var lookAheadHorizontalOffset =  _player.Direction *_lookAheadHorizontalDistance;
             var lookAheadVerticalOffset   = _player.IsFalling? _lookAheadVerticalDistance: 0; //TODO: Make a separate lookahead vertical variable
             _currHorizontalLookOffset = Mathf.MoveToward(_currHorizontalLookOffset, lookAheadHorizontalOffset, _dynamicLookAheadSpeed * (float) delta);
 
@@ -93,7 +93,7 @@ public partial class GameCamera : Camera2D
             }
 
 
-            if((_player.Velocity.X == 0 || _player.IsClimbing) && _isMoving )
+            if(_player.Velocity.X == 0  && _isMoving )
             {
                 _isMoving = false;
                 _targetPos.Y = playerGlobalPos.Y;
