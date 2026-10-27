@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dh7akf3ef18r2" path="res://graphics/player/idle.png" id="3_p47bc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5vmv2"]
-size = Vector2(18, 33)
+size = Vector2(16, 32)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_qek5x"]
 atlas = ExtResource("2_p47bc")
@@ -99,7 +99,6 @@ DashStrength = 350.0
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1838315505]
-position = Vector2(0, -0.5)
 shape = SubResource("RectangleShape2D_5vmv2")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1362058575]
@@ -109,14 +108,6 @@ frame_progress = 0.9071109
 
 [node name="JumpBufferTimer" type="Timer" parent="." unique_id=1469793793]
 wait_time = 0.1
-one_shot = true
-
-[node name="WallJumpDurationTimer" type="Timer" parent="." unique_id=74752916]
-wait_time = 0.2
-one_shot = true
-
-[node name="WallClimbEnabledTimer" type="Timer" parent="." unique_id=522193975]
-wait_time = 0.2
 one_shot = true
 
 [node name="DashDurationTimer" type="Timer" parent="." unique_id=1429618969]
@@ -135,6 +126,13 @@ one_shot = true
 wait_time = 0.2
 one_shot = true
 
+[node name="GroundPoundActivationTimer" type="Timer" parent="." unique_id=2059733066]
+wait_time = 0.1
+one_shot = true
+
+[node name="WallClingBufferTimer" type="Timer" parent="." unique_id=671465324]
+one_shot = true
+
 [node name="AttackShape" type="Area2D" parent="." unique_id=1844897492]
 visible = false
 modulate = Color(0.3986292, 0.00010887176, 0.3986263, 1)
@@ -147,9 +145,8 @@ metadata/_edit_group_ = true
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackShape" unique_id=1314172250]
 shape = SubResource("CircleShape2D_38sbo")
 
-[connection signal="timeout" from="WallJumpDurationTimer" to="." method="OnWallJumpDurationTimerTimeout"]
-[connection signal="timeout" from="WallClimbEnabledTimer" to="." method="OnWallClimbEnabledTimerTimeout"]
 [connection signal="timeout" from="DashDurationTimer" to="." method="OnDashDurationTimeout"]
 [connection signal="timeout" from="FreeFallingTimer" to="." method="OnFreeFallingTimerTimeout"]
 [connection signal="timeout" from="AttackBufferTimer" to="." method="AttackBufferTimeout"]
+[connection signal="timeout" from="GroundPoundActivationTimer" to="." method="OnGroundPoundActivationTimeout"]
 [connection signal="body_entered" from="AttackShape" to="." method="OnAttackShapeEntered"]

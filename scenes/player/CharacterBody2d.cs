@@ -3,7 +3,9 @@ using System;
 
 public partial class CharacterBody2d : CharacterBody2D
 {
-    //TODO: Refactor this into functions easier to follow
+    private AnimatedSprite2D AnimatedSprite;
+    private Vector2 _localGravity;
+
     [Export]
     public float Speed = 300.0f;
     [Export]
@@ -13,23 +15,13 @@ public partial class CharacterBody2d : CharacterBody2D
     [Export]
     public float DashStrength = 800f;
     [Export]
-    public float WallSlideSpeed = 200f;
-    private AnimatedSprite2D AnimatedSprite;
+    public float WallTraversingSpeed = 350f;
+
+
     public int Direction;
     public bool _canMove = true;
 
-    private Timer _jumpBufferTimer;
-    private Timer _wallJumpDurationTimer;
-    private Timer _wallClimbEnabledTimer;
-    private Timer _dashDurationTimer;
-    private Timer _freeFallingTimer;
-    private Timer _dashCoolDownTimer;
-    private Timer _attackBufferTimer;
-    private Timer _attackDurationTimner;
 
-    private Vector2 _localGravity;
-
-    private bool _isWallJumping = false;
 
     public bool IsFalling;
     private bool _isDashing = false;
@@ -47,7 +39,17 @@ public partial class CharacterBody2d : CharacterBody2D
     public bool isGroundPounding;
 
     public Area2D AttackZone;
+    private bool _canGroundPound;
 
+
+    private Timer _jumpBufferTimer;
+    private Timer _dashDurationTimer;
+    private Timer _freeFallingTimer;
+    private Timer _dashCoolDownTimer;
+    private Timer _attackBufferTimer;
+    // private Timer _attackDurationTimer;
+    private Timer _groundPoundActivationTimer;
+    private Timer _wallClingBufferTimer;
 
 
     //Make wallclimbing possible X seconds after jumping to prevent weird behavior at corners
@@ -58,14 +60,14 @@ public partial class CharacterBody2d : CharacterBody2D
         AnimatedSprite.Play();
 
         _localGravity = GetGravity();
-        _jumpBufferTimer        = GetNode<Timer>("JumpBufferTimer");
-        _wallJumpDurationTimer  = GetNode<Timer>("WallJumpDurationTimer");
-        _wallClimbEnabledTimer  = GetNode<Timer>("WallClimbEnabledTimer");
-        _dashDurationTimer      = GetNode<Timer>("DashDurationTimer");
-        _freeFallingTimer       = GetNode<Timer>("FreeFallingTimer");
-        _dashCoolDownTimer      = GetNode<Timer>("DashCoolDownTimer");
-        _attackBufferTimer      = GetNode<Timer>("AttackBufferTimer");
-        // _attackDurationTimner  = GetNode<Timer>("AttackDurationTimer"   );
+        _jumpBufferTimer                = GetNode<Timer>("JumpBufferTimer");
+        _dashDurationTimer              = GetNode<Timer>("DashDurationTimer");
+        _freeFallingTimer               = GetNode<Timer>("FreeFallingTimer");
+        _dashCoolDownTimer              = GetNode<Timer>("DashCoolDownTimer");
+        _attackBufferTimer              = GetNode<Timer>("AttackBufferTimer");
+        _groundPoundActivationTimer     = GetNode<Timer>("GroundPoundActivationTimer");
+        _wallClingBufferTimer           = GetNode<Timer>("WallClingBufferTimer");
+        // _attackDurationTimer  = GetNode<Timer>("AttackDurationTimer"   );
         _attackZone = GetNode<Area2D>("AttackShape");
     }
 
@@ -86,24 +88,25 @@ public partial class CharacterBody2d : CharacterBody2D
             if (Input.IsActionJustPressed("jump"))
             {
                 _jumpBufferTimer.Start();
+                _groundPoundActivationTimer.Start();
             }
 
             if (IsOnFloor() && _jumpBufferTimer.TimeLeft > 0)
             {
-                _jumpBufferTimer.Stop();
                 return JumpVelocity;
             }
 
-            if (Input.IsActionJustReleased("jump") && YVelocity < 0)
+            if (Input.IsActionJustReleased("jump") && YVelocity < 0){
+                _groundPoundActivationTimer.Stop();
                 return YVelocity /= 5;
+            }
         }
         return YVelocity;
     }
-    //TODO: Use a different "wall traverse speed" instead of dash speed
-    //TODO: Make tiles sepcififically made to be interactable by dashing into them instead of using all tiles for this
-    public Vector2 HandleDash(Vector2 velocity)
-    {
 
+
+    public void HandleDashInput()
+    {
         if (Input.IsActionJustPressed("dash") && !_isDashing && _canDash)
         {
             if (_dashCoolDownTimer.IsStopped())
@@ -113,6 +116,7 @@ public partial class CharacterBody2d : CharacterBody2D
                 _isDashing = true;
                 _canDash = false;
                 _canMove = false;
+                _canGroundPound = false;
 
 
                 //While dashing you also attack
@@ -123,18 +127,31 @@ public partial class CharacterBody2d : CharacterBody2D
                 //Start timers for dash cooldown and dash duration (how long the dash lasts)
                 _dashDurationTimer.Start();
                 _dashCoolDownTimer.Start();
+                _wallClingBufferTimer.Start();
             }
         };
+    }
 
+    public Vector2 HandleDashCollisions(Vector2 velocity)
+    {
         if (_isDashing)
         {
             //if hitting a wall while dashing, switch to going up the wall
+           if (IsOnFloor())
+                return new Vector2(_lastPositiveDirectionUsed * DashStrength, 0);
+            else
+                return new Vector2(_lastPositiveDirectionUsed, -1).Normalized() * -JumpVelocity; //TODO: get a different variable for the air dash
+        }
+
+        if(_isDashing || _wallClingBufferTimer.TimeLeft > 0)
+        {
             if (IsOnWall())
             {
                 _isDashing = false;
                 isWallSliding = true;
                 isCeillingSliding = false;
                 _dashDurationTimer.Stop();
+                _wallClingBufferTimer.Stop();
             }
             //if hitting a ceilling while dashing, switch to going up the wall
             else if (IsOnCeilingOnly())
@@ -143,62 +160,94 @@ public partial class CharacterBody2d : CharacterBody2D
                 isCeillingSliding = true; //TODO: make a ceilling dash duration instead of making it infinite. Could do the same for wall jumping
                 isWallSliding = false;
                 _dashDurationTimer.Stop();
-            }
-            else if (IsOnFloor())
-                return new Vector2(_lastPositiveDirectionUsed * DashStrength, 0);
-            else
-                return new Vector2(_lastPositiveDirectionUsed, -1).Normalized() * DashStrength; //TODO: get a different variable for the air dash
-
-        }
-
-        if (isWallSliding)
-        {
-            //While on wall, keep going
-            if (IsOnWall()){
-                _canMove = false;
-                return new Vector2(_lastPositiveDirectionUsed * DashStrength, JumpVelocity);
-            }
-            //if off wall, stop
-            else
-            {
-                isWallSliding = false;
-                _canMove = true;
-                _attackBufferTimer.Start();
-
-                return new Vector2(_lastPositiveDirectionUsed * Speed, JumpVelocity);
+                _wallClingBufferTimer.Stop();
             }
         }
 
-        if (isCeillingSliding)
-        {
-            if (IsOnCeilingOnly())
-            {
-                _canMove = false;
-                return new Vector2(_lastPositiveDirectionUsed * DashStrength, JumpVelocity);
-            }
-            else
-            {
-                isCeillingSliding = false;
-                _canMove = true;
-                _attackBufferTimer.Start();
-            }
-        }
+        velocity = HandleWallTraversal    (velocity);
+        velocity = HandleCeillingTraversal(velocity);
 
 
         if (IsOnFloor())
             _canDash = true;
 
         return velocity;
+
+    }
+
+
+    public Vector2 HandleWallTraversal(Vector2 velocity)
+    {
+        if (isWallSliding)
+        {
+            //While on wall, keep going
+            if (IsOnWall()){
+                _canMove = false;
+                _canGroundPound = false;
+                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity);
+            }
+            //if off wall, stop
+            else
+            {
+                isWallSliding = false;
+                _canMove = true;
+                _canGroundPound = true;
+                _attackBufferTimer.Start();
+
+                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity);
+            }
+        }
+
+        return velocity;
+    }
+
+    public Vector2 HandleCeillingTraversal(Vector2 velocity)
+    {
+        if (isCeillingSliding)
+        {
+            if (IsOnCeilingOnly())
+            {
+                _canMove = false;
+                _canGroundPound = true;
+                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity);
+            }
+            else
+            {
+                isCeillingSliding = false;
+                _canMove = true;
+                _canGroundPound = true;
+                _attackBufferTimer.Start();
+                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, 0);
+            }
+        }
+
+        return velocity;
+
+    }
+
+
+    //TODO: Use a different "wall traverse speed" instead of dash speed
+    //TODO: Make tiles sepcififically made to be interactable by dashing into them instead of using all tiles for this
+    public Vector2 HandleDash(Vector2 velocity)
+    {
+
+        HandleDashInput();
+
+        velocity = HandleDashCollisions(velocity);
+
+        return velocity;
     }
 
     //TODO: Rework this to allow ground pound while on ceilling (but not on wall)
-    public float HandlePound(float YVelocity)
+    public Vector2 HandlePound(Vector2 velocity)
     {
-        if(Input.IsActionJustPressed("pound") && !_isDashing && _canDash && !IsOnFloor())
+        if(Input.IsActionJustPressed("pound") && _canGroundPound && !IsOnFloor())
         {
             isGroundPounding = true;
+            _canGroundPound  = false;
 
             _isDashing = false;
+            isWallSliding  = false;
             _canDash   = false;
             _canMove   = false;
 
@@ -220,12 +269,16 @@ public partial class CharacterBody2d : CharacterBody2D
             {
                 isGroundPounding = true;
                 _canMove         = false;
-                return 2f *  DashStrength; //TODO: Use a dedicated value for this strength
+                return new Vector2( 0, 2f *  DashStrength); //TODO: Use a dedicated value for this strength
             }
 
         }
 
-        return YVelocity;
+        if (IsOnFloor())
+            _canGroundPound = false;
+
+
+        return velocity;
     }
 
 
@@ -250,9 +303,9 @@ public partial class CharacterBody2d : CharacterBody2D
                 Direction = 0;
             }
 
-            if (!_isWallJumping && !_isDashing && Direction != 0)
+            if (Direction != 0)
                 return Direction * Speed;
-            else if (!_isWallJumping && !_isDashing && Direction == 0)
+            else if (Direction == 0)
                 return Mathf.MoveToward(XVelocity, 0, 50f); //TODO: Add variable for stop speed
         }
 
@@ -290,10 +343,20 @@ public partial class CharacterBody2d : CharacterBody2D
     {
         velocity   = HandleGravity(delta, velocity);
         velocity   = HandleDash   (velocity);
-        velocity.Y = HandlePound  (velocity.Y);
+        velocity   = HandlePound  (velocity);
         velocity.Y = HandleJump   (velocity.Y);
         velocity.X = HandleHorizontalMovement(velocity.X);
         // velocity   = HandleWallJumping       (velocity);
+
+
+        //Handle free falling for camera movement (free falling is falling for X seconds)
+        if (velocity.Y <= 0)
+        {
+            IsFalling = false;
+            _freeFallingTimer.Stop();
+        }
+        else if (_freeFallingTimer.IsStopped())
+            _freeFallingTimer.Start();
 
         return velocity;
     }
@@ -303,28 +366,19 @@ public partial class CharacterBody2d : CharacterBody2D
         Vector2 velocity = Velocity;
 
         velocity = HandleMovement(delta, velocity);
+
         HandleAnimations(velocity);
 
-        if (velocity.Y <= 0)
-        {
-            IsFalling = false;
-            _freeFallingTimer.Stop();
-        }
-        else if (_freeFallingTimer.IsStopped())
-            _freeFallingTimer.Start();
+
 
         Velocity = velocity;
+
         MoveAndSlide();
     }
 
     private void OnFreeFallingTimerTimeout()
     {
         IsFalling = true;
-    }
-
-    private void OnWallJumpDurationTimerTimeout()
-    {
-        _isWallJumping = false;
     }
 
     private void OnWallClimbEnabledTimerTimeout()
@@ -335,8 +389,9 @@ public partial class CharacterBody2d : CharacterBody2D
 
     private void OnDashDurationTimeout()
     {
-        _isDashing = false;
-        _canMove = true;
+        _isDashing      = false;
+        _canMove        = true;
+        _canGroundPound = true;
         _attackBufferTimer.Start();
     }
 
@@ -345,6 +400,10 @@ public partial class CharacterBody2d : CharacterBody2D
     {
         _attackZone.Visible = false;
         _attackZone.Monitoring = false;
+    }
+
+    public void OnGroundPoundActivationTimeout(){
+        _canGroundPound = true;
     }
 
 }
