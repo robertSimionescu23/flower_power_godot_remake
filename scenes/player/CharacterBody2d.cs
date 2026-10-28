@@ -17,6 +17,9 @@ public partial class CharacterBody2d : CharacterBody2D
     [Export]
     public float WallTraversingSpeed = 350f;
 
+    [Export]
+    public float GroundPoundStrength = 1600f;
+
 
     public int Direction;
     public bool _canMove = true;
@@ -51,6 +54,9 @@ public partial class CharacterBody2d : CharacterBody2D
 
     [Export]
     private State PlayerState = State.Idle;
+
+    private bool _canClimb = false;
+    private bool _upDash   = false;
 
     enum State
     {
@@ -128,20 +134,28 @@ public partial class CharacterBody2d : CharacterBody2D
 
     public void HandleDashInput()
     {
+        var isNotHuggingNormalWall = !IsOnWall() || (IsOnWall() && _canClimb) || Input.IsActionPressed("move_up"); //can dash while hugging wall only if that wall is climbable
+
+
         if(
             Input.IsActionJustPressed("dash")
             && PlayerState is not (State.Dashing or State.GroundPound or State.WallTraversing or State.CeillingTraversing)
             && _canDash
+            && isNotHuggingNormalWall
         ){
             if (_dashCoolDownTimer.IsStopped())
             {
 
+                _upDash = Input.IsActionPressed("move_up");
+
+
                 PlayerState = State.Dashing;
+
                 _canDash = false;
 
                 //Start timers for dash cooldown and dash duration (how long the dash lasts)
-                _dashDurationTimer.Start();
-                _dashCoolDownTimer.Start();
+                _dashDurationTimer   .Start();
+                _dashCoolDownTimer   .Start();
                 _wallClingBufferTimer.Start();
             }
         };
@@ -149,35 +163,41 @@ public partial class CharacterBody2d : CharacterBody2D
 
     public Vector2 HandleDashCollisions(Vector2 velocity)
     {
+        //Check if the player is colliding to climbale walls that influence dash behavior
+        CheckForClimbableWall();
+
         if (PlayerState is State.Dashing)
         {
-           if (IsOnFloor())
-                return new Vector2(_lastPositiveDirectionUsed * DashStrength, 0);
-            else
-                return new Vector2(_lastPositiveDirectionUsed, -1).Normalized() * -JumpVelocity; //TODO: get a different variable for the air dash
+            if(_upDash)
+                return new Vector2(0, -DashStrength);
+
+            return new Vector2(_lastPositiveDirectionUsed * DashStrength, 0);
         }
 
         if(PlayerState is State.Dashing || _wallClingBufferTimer.TimeLeft > 0)
         {
-            //if hitting a wall while dashing, switch to going up the wall
-            if (IsOnWall())
+            //if hitting a rock wall while dashing, switch to going up the wall
+            if (_canClimb && IsOnWall())
             {
-                // _isDashing = false;
-                // isWallSliding = true;
-                // isCeillingSliding = false;
-
                 PlayerState = State.WallTraversing;
 
                 _dashDurationTimer.Stop();
                 _wallClingBufferTimer.Stop();
             }
-            //if hitting a ceilling while dashing, switch to going up the wall
-            else if (IsOnCeilingOnly())
-            {
-                // _isDashing = false;
-                // isCeillingSliding = true; //TODO: make a ceilling dash duration instead of making it infinite. Could do the same for wall jumping
-                // isWallSliding = false;
 
+            //If hitting a normal wall while dashing, stop the dash
+            else if(!_canClimb && IsOnWall())
+            {
+                PlayerState = State.Idle;
+
+                _dashDurationTimer.Stop();
+                _wallClingBufferTimer.Stop();
+
+            }
+            //if hitting a rock ceilling while dashing, switch to going up the wall
+            else if (IsOnCeilingOnly() && _canClimb)
+            {
+                 //TODO: make a ceilling dash duration instead of making it infinite. Could do the same for wall jumping
                 PlayerState = State.CeillingTraversing;
 
                 _dashDurationTimer.Stop();
@@ -202,21 +222,15 @@ public partial class CharacterBody2d : CharacterBody2D
         if (PlayerState is State.WallTraversing)
         {
             //While on wall, keep going
-            if (IsOnWall()){
-                // _canMove = false;
-                // _canGroundPound = false;
+            if (_canClimb){
                 PlayerState = State.WallTraversing;
                 return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity);
             }
             //if off wall, stop
             else
             {
-                // isWallSliding = false;
-                // _canMove = true;
-                // _canGroundPound = true;
-
                 PlayerState = State.Idle;
-                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity);
+                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity / 2);
             }
         }
 
@@ -229,16 +243,11 @@ public partial class CharacterBody2d : CharacterBody2D
         {
             if (IsOnCeilingOnly())
             {
-                // _canMove = false;
-                // _canGroundPound = true;
                 PlayerState = State.CeillingTraversing;
                 return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity);
             }
             else
             {
-                // isCeillingSliding = false;
-                // _canMove = true;
-                // _canGroundPound = true;
 
                 PlayerState = State.Idle;
                 return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, 0);
@@ -249,8 +258,6 @@ public partial class CharacterBody2d : CharacterBody2D
 
     }
 
-
-    //TODO: Use a different "wall traverse speed" instead of dash speed
     //TODO: Make tiles sepcififically made to be interactable by dashing into them instead of using all tiles for this
     public Vector2 HandleDash(Vector2 velocity)
     {
@@ -262,16 +269,15 @@ public partial class CharacterBody2d : CharacterBody2D
         return velocity;
     }
 
-    //TODO: Rework this to allow ground pound while on ceilling (but not on wall)
-    public Vector2 HandlePound(Vector2 velocity)
+    public Vector2 HandleGroundPound(Vector2 velocity)
     {
+        //TODO: Add visual cue that a floor pound is possible
 
-        if(
-            Input.IsActionJustPressed("pound") &&
-            PlayerState is State.Jumping or State.Falling or State.CeillingTraversing &&
-            !_groundPoundRay.IsColliding()
-        ){
+        //Ignore distance requirment for pounding while on ceilling
+        var isHighEnough = PlayerState is State.Jumping or State.Falling && !_groundPoundRay.IsColliding();
 
+        if(Input.IsActionJustPressed("pound") && ( isHighEnough || PlayerState is State.CeillingTraversing))
+        {
             PlayerState = State.GroundPound;
 
             _dashCoolDownTimer.Start();
@@ -285,7 +291,7 @@ public partial class CharacterBody2d : CharacterBody2D
             }
             else
             {
-                return new Vector2( 0, 2f *  DashStrength); //TODO: Use a dedicated value for this strength
+                return new Vector2( 0, GroundPoundStrength); //TODO: Use a dedicated value for this strength
             }
 
         }
@@ -324,7 +330,7 @@ public partial class CharacterBody2d : CharacterBody2D
             if (Direction != 0)
                 return Direction * Speed;
             else if (Direction == 0)
-                return Mathf.MoveToward(XVelocity, 0, 50f); //TODO: Add variable for stop speed
+                return Mathf.MoveToward(XVelocity, 0, DirectionChangeSpeed);
         }
 
         return XVelocity;
@@ -365,7 +371,8 @@ public partial class CharacterBody2d : CharacterBody2D
     //TODO: Implement actual attack mechanics
     public void OnAttackShapeEntered(Node2D body)
     {
-        GD.Print(body.GetType());
+        // if (body is TileMapLayer tileMapLayer)
+        //     GD.Print(tileMapLayer.TileSet.Name);
     }
 
 
@@ -373,7 +380,7 @@ public partial class CharacterBody2d : CharacterBody2D
     {
         velocity   = HandleGravity(delta, velocity);
         velocity   = HandleDash   (velocity);
-        velocity   = HandlePound  (velocity);
+        velocity   = HandleGroundPound  (velocity);
         velocity.Y = HandleJump   (velocity.Y);
         velocity.X = HandleHorizontalMovement(velocity.X);
 
@@ -389,18 +396,49 @@ public partial class CharacterBody2d : CharacterBody2D
         return velocity;
     }
 
+
+    public void CheckForClimbableWall()
+    {
+        _canClimb = false;
+
+        for (int i = 0; i < GetSlideCollisionCount(); i++)
+        {
+            var collision          = GetSlideCollision(i);
+            var collidedObject     = collision.GetCollider(); //Get the object player collided with
+            var collisionPosGlobal = collision.GetPosition() - collision.GetNormal() * 3.0f; //Check slightly closer to cell center to avoid duds
+
+            if(collidedObject is not TileMapLayer tilemap)
+                continue;
+
+            var collisionPosLocal = tilemap.ToLocal(collisionPosGlobal);
+            var cell              = tilemap.LocalToMap( collisionPosLocal );
+            var tileData          = tilemap.GetCellTileData(cell);
+
+            if(tileData == null)
+                continue;
+
+            if(tileData.GetCustomData("isClimbable").AsBool())
+            {
+                _canClimb = true;
+                break;
+            }
+        }
+    }
+
     public override void _PhysicsProcess(double delta)
     {
         Vector2 velocity = Velocity;
 
         velocity = HandleMovement(delta, velocity);
 
-
         HandleAttack();
 
         Velocity = velocity;
 
         MoveAndSlide();
+
+        GD.Print(PlayerState);
+
         HandleAnimations();
     }
 
