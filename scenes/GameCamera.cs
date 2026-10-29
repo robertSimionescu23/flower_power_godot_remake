@@ -4,7 +4,8 @@ using System;
 public partial class GameCamera : Camera2D
 {
     private Rect2 _levelTilemapBounds;
-    private CharacterBody2d _player;
+    [Export]
+    private Player _player;
 
     // private Vector2 _screenSize;
 
@@ -24,7 +25,6 @@ public partial class GameCamera : Camera2D
     private float _currHorizontalLookOffset        = 0f;
     [Export]
     private float _dynamicLookAheadSpeed = 50f; //How fast the lookahead distance changes based on time moving
-    [Export]
     private float _defaultFollowSpeed = 300f;
     private float _followSpeed;
     [Export]
@@ -48,13 +48,11 @@ public partial class GameCamera : Camera2D
         //TODO:Maybe screen size is irrelevant to dead zone size
         // _screenSize = GetViewport().GetVisibleRect().Size;
         _targetPos   = Position;
+        _defaultFollowSpeed = _player.Speed;
         _followSpeed = _defaultFollowSpeed;
 
         _horizontalMargin = _defaultHorizontalMargin;
         _verticalMargin   = _defaultVerticalMargin;
-
-        _player = GetNode<CharacterBody2d>("../Player"); //Handle getting tyhe player better
-
     }
 
     public void UpdateTilemapBounds(BaseLevel currLevel)
@@ -79,9 +77,8 @@ public partial class GameCamera : Camera2D
             var playerGlobalPos = _player.GlobalPosition;
 
 
-            var lookAheadHorizontalOffset =  _player.Direction *_lookAheadHorizontalDistance;
-            var lookAheadVerticalOffset   = _player.IsFalling? _lookAheadVerticalDistance: 0; //TODO: Make a separate lookahead vertical variable
-            _currHorizontalLookOffset = Mathf.MoveToward(_currHorizontalLookOffset, lookAheadHorizontalOffset, _dynamicLookAheadSpeed * (float) delta);
+            var lookAheadHorizontalOffset = _player.Direction *_lookAheadHorizontalDistance;
+            var lookAheadVerticalOffset   = _player.IsFreeFalling? _lookAheadVerticalDistance: 0;
 
 
             if(Mathf.Abs(playerGlobalPos.X - Position.X) > _horizontalMargin && !_isMoving){
@@ -92,8 +89,9 @@ public partial class GameCamera : Camera2D
                 _isMoving = true;
             }
 
+            _currHorizontalLookOffset = Mathf.MoveToward(_currHorizontalLookOffset, lookAheadHorizontalOffset, _defaultFollowSpeed * (float)delta);
 
-            if(_player.Velocity.X == 0  && _isMoving )
+            if(_player.Velocity == Vector2.Zero && _isMoving )
             {
                 _isMoving = false;
                 _targetPos.Y = playerGlobalPos.Y;
@@ -113,6 +111,9 @@ public partial class GameCamera : Camera2D
                 _defaultFollowSpeed * 2.5f,
                 Mathf.Clamp(distance/_maxDistance, 0f, 1f)
             );
+
+            if(_player.PlayerState is State.GroundPound)
+                _followSpeed = -_player.Velocity.Y;
 
             Position = Position.MoveToward(_targetPos, _followSpeed * (float)delta);
         }

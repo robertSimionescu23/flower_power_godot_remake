@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ryeekdqvwsxx"]
 
-[ext_resource type="Script" uid="uid://c7j2g8nwhjbof" path="res://scenes/player/CharacterBody2d.cs" id="2_g2els"]
+[ext_resource type="Script" uid="uid://drilnkwiw4vsx" path="res://scenes/player/Player.cs" id="1_p47bc"]
 [ext_resource type="Texture2D" uid="uid://dwcunltpiexvx" path="res://graphics/player/fall.png" id="2_p47bc"]
 [ext_resource type="Texture2D" uid="uid://by2y4og2ippk4" path="res://graphics/player/run+idle.png" id="3_gmlin"]
 [ext_resource type="Texture2D" uid="uid://dji87vegepupa" path="res://graphics/player/jump.png" id="3_lvxji"]
@@ -91,12 +91,10 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_38sbo"]
 radius = 23.42
 
-[node name="CharacterBody2D" type="CharacterBody2D" unique_id=1970844428]
+[node name="Player" type="CharacterBody2D" unique_id=1970844428]
 collision_layer = 2
 collision_mask = 9
-script = ExtResource("2_g2els")
-Speed = 200.0
-DashStrength = 350.0
+script = ExtResource("1_p47bc")
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1838315505]
@@ -107,31 +105,33 @@ sprite_frames = SubResource("SpriteFrames_5vmv2")
 animation = &"idle"
 frame_progress = 0.9071109
 
-[node name="JumpBufferTimer" type="Timer" parent="." unique_id=1469793793]
+[node name="Timers" type="Node" parent="." unique_id=1149763760]
+
+[node name="JumpBufferTimer" type="Timer" parent="Timers" unique_id=1469793793]
 wait_time = 0.1
 one_shot = true
 
-[node name="DashDurationTimer" type="Timer" parent="." unique_id=1429618969]
+[node name="DashDurationTimer" type="Timer" parent="Timers" unique_id=1429618969]
 wait_time = 0.1
 one_shot = true
 
-[node name="FreeFallingTimer" type="Timer" parent="." unique_id=1887751345]
+[node name="FreeFallingTimer" type="Timer" parent="Timers" unique_id=1887751345]
 wait_time = 0.3
 one_shot = true
 
-[node name="DashCoolDownTimer" type="Timer" parent="." unique_id=1040883868]
+[node name="DashCoolDownTimer" type="Timer" parent="Timers" unique_id=1040883868]
 wait_time = 0.5
 one_shot = true
 
-[node name="AttackBufferTimer" type="Timer" parent="." unique_id=2124058192]
+[node name="AttackBufferTimer" type="Timer" parent="Timers" unique_id=2124058192]
 wait_time = 0.1
 one_shot = true
 
-[node name="GroundPoundActivationTimer" type="Timer" parent="." unique_id=2059733066]
+[node name="GroundPoundActivationTimer" type="Timer" parent="Timers" unique_id=2059733066]
 wait_time = 0.1
 one_shot = true
 
-[node name="WallClingBufferTimer" type="Timer" parent="." unique_id=671465324]
+[node name="WallClingBufferTimer" type="Timer" parent="Timers" unique_id=671465324]
 one_shot = true
 
 [node name="AttackShape" type="Area2D" parent="." unique_id=1844897492]
@@ -148,8 +148,8 @@ shape = SubResource("CircleShape2D_38sbo")
 
 [node name="RayCast2D" type="RayCast2D" parent="." unique_id=332126038]
 
-[connection signal="timeout" from="DashDurationTimer" to="." method="OnDashDurationTimeout"]
-[connection signal="timeout" from="FreeFallingTimer" to="." method="OnFreeFallingTimerTimeout"]
-[connection signal="timeout" from="AttackBufferTimer" to="." method="AttackBufferTimeout"]
-[connection signal="timeout" from="GroundPoundActivationTimer" to="." method="OnGroundPoundActivationTimeout"]
+[connection signal="timeout" from="Timers/DashDurationTimer" to="." method="OnDashDurationTimeout"]
+[connection signal="timeout" from="Timers/FreeFallingTimer" to="." method="OnFreeFallingTimerTimeout"]
+[connection signal="timeout" from="Timers/AttackBufferTimer" to="." method="AttackBufferTimeout"]
+[connection signal="timeout" from="Timers/GroundPoundActivationTimer" to="." method="OnGroundPoundActivationTimeout"]
 [connection signal="body_entered" from="AttackShape" to="." method="OnAttackShapeEntered"]

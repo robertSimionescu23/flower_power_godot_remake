@@ -7,12 +7,12 @@ public partial class Main : Node2D
     public PackedScene startLevel;
     public BaseLevel   CurrLevelInstance;
     public GameCamera ActiveCamera;
-    public CharacterBody2d Player;
+    public Player Player;
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         ActiveCamera = GetNode<GameCamera>("Camera2D");
-        Player = GetNode<CharacterBody2d>("Player");
+        Player = GetNode<Player>("Player");
 
         ChangeCurrentLevel(startLevel);
     }

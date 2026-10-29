@@ -9,18 +9,21 @@
 script = ExtResource("1_sugp2")
 startLevel = ExtResource("2_jyhfs")
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=1540875752]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1540875752 node_paths=PackedStringArray("_player")]
 position = Vector2(234, 63)
 editor_draw_limits = true
 editor_draw_drag_margin = true
 script = ExtResource("2_sugp2")
+_player = NodePath("../Player")
 _defaultHorizontalMargin = 50.0
 _defaultVerticalMargin = 80.0
+_lookAheadVerticalDistance = 150.0
+_defaultFollowSpeed = 200.0
 
 [node name="Player" parent="." unique_id=1360087966 instance=ExtResource("1_o5qli")]
 visible = false
 position = Vector2(110, 73)
-Speed = 250.0
-DashStrength = 600.0
-WallSlideSpeed = 24.0
-_canMove = true
+Speed = 200.0
+DashStrength = 400.0
+WallTraversingSpeed = 300.0
+GroundPoundStrength = 400.0

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 
+[GlobalClass]
 public partial class BaseLevel: Node2D
 {
     public Vector2 StartLocation;
