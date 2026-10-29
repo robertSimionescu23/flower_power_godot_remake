@@ -17,7 +17,6 @@ public enum State
 public partial class Player : CharacterBody2D
 {
     private AnimatedSprite2D AnimatedSprite;
-    private Vector2 _localGravity;
 
     [Export]
     public float Speed = 300.0f;
@@ -37,32 +36,20 @@ public partial class Player : CharacterBody2D
     public int Direction;
     public bool _canMove = true;
 
-
-
     public bool IsFreeFalling;
-    private bool _isDashing = false;
     private bool _canDash = true;
 
     private int _lastPositiveDirectionUsed = 1;
 
-
     public Area2D _attackZone;
 
-
-    public bool isWallSliding;
-    public bool isCeillingSliding;
-    public bool isGroundPounding;
-
-    public Area2D AttackZone;
     private RayCast2D _groundPoundRay;
-
 
     private Timer _jumpBufferTimer;
     private Timer _dashDurationTimer;
     private Timer _freeFallingTimer;
     private Timer _dashCoolDownTimer;
     private Timer _attackBufferTimer;
-    // private Timer _attackDurationTimer;
     private Timer _wallClingBufferTimer;
 
     public State PlayerState = State.Idle;
@@ -75,7 +62,6 @@ public partial class Player : CharacterBody2D
         AnimatedSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
         AnimatedSprite.Play();
 
-        _localGravity = GetGravity();
         _jumpBufferTimer                = GetNode<Timer>("Timers/JumpBufferTimer");
         _dashDurationTimer              = GetNode<Timer>("Timers/DashDurationTimer");
         _freeFallingTimer               = GetNode<Timer>("Timers/FreeFallingTimer");
@@ -160,7 +146,6 @@ public partial class Player : CharacterBody2D
             {
 
                 _upDash = Input.IsActionPressed("move_up");
-
 
                 PlayerState = State.Dashing;
 
@@ -373,7 +358,7 @@ public partial class Player : CharacterBody2D
         {
             _attackZone.Visible    = true;
             _attackZone.Monitoring = true;
-            _attackBufferTimer.Stop();
+            _attackBufferTimer.Stop(); //To prevent using the buffer time if the dash started before it ended
         }
         else if(_attackBufferTimer.TimeLeft == 0)
         {
@@ -409,14 +394,14 @@ public partial class Player : CharacterBody2D
         {
             var collision          = GetSlideCollision(i);
             var collidedObject     = collision.GetCollider(); //Get the object player collided with
-            var collisionPosGlobal = collision.GetPosition() - collision.GetNormal() * 3.0f; //Check slightly closer to cell center to avoid duds
 
             if(collidedObject is not TileMapLayer tilemap)
                 continue;
 
-            var collisionPosLocal = tilemap.ToLocal(collisionPosGlobal);
-            var cell              = tilemap.LocalToMap( collisionPosLocal );
-            var tileData          = tilemap.GetCellTileData(cell);
+            var collisionPosGlobal = collision.GetPosition() - collision.GetNormal() * 3.0f; //Check slightly closer to cell center to avoid duds
+            var collisionPosLocal  = tilemap.ToLocal(collisionPosGlobal);
+            var cell               = tilemap.LocalToMap(collisionPosLocal);
+            var tileData           = tilemap.GetCellTileData(cell);
 
             if(tileData == null)
                 continue;
