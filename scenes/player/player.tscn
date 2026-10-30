@@ -5,6 +5,11 @@
 [ext_resource type="Texture2D" uid="uid://by2y4og2ippk4" path="res://graphics/player/run+idle.png" id="3_gmlin"]
 [ext_resource type="Texture2D" uid="uid://dji87vegepupa" path="res://graphics/player/jump.png" id="3_lvxji"]
 [ext_resource type="Texture2D" uid="uid://dh7akf3ef18r2" path="res://graphics/player/idle.png" id="3_p47bc"]
+[ext_resource type="Script" uid="uid://nsabphpnk0j8" path="res://scenes/player/movement/fsm/PlayerFsm.cs" id="6_0owmy"]
+[ext_resource type="Script" uid="uid://dudnoht825vg4" path="res://scenes/player/movement/fsm/states/Idle.cs" id="7_0owmy"]
+[ext_resource type="Script" uid="uid://ctau5codu5u4i" path="res://scenes/player/movement/fsm/states/Moving.cs" id="8_qek5x"]
+[ext_resource type="Script" uid="uid://d1rn4p0hkv37u" path="res://scenes/player/movement/fsm/states/Jumping.cs" id="9_5gtgg"]
+[ext_resource type="Script" uid="uid://dhpkrl0hy33j5" path="res://scenes/player/movement/fsm/states/Falling.cs" id="10_h17s1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5vmv2"]
 size = Vector2(16, 32)
@@ -51,7 +56,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_5gtgg")
 }],
 "loop": 1,
-"name": &"fall",
+"name": &"falling",
 "speed": 5.0
 }, {
 "frames": [{
@@ -73,7 +78,7 @@ animations = [{
 "texture": SubResource("AtlasTexture_0owmy")
 }],
 "loop": 1,
-"name": &"jump",
+"name": &"jumping",
 "speed": 5.0
 }, {
 "frames": [{
@@ -84,14 +89,14 @@ animations = [{
 "texture": SubResource("AtlasTexture_p47bc")
 }],
 "loop": 1,
-"name": &"running",
+"name": &"moving",
 "speed": 10.0
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_38sbo"]
 radius = 23.42
 
-[node name="Player" type="CharacterBody2D" unique_id=1970844428]
+[node name="Player" type="CharacterBody2D" unique_id=1970844428 groups=["Player"]]
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_p47bc")
@@ -102,13 +107,11 @@ shape = SubResource("RectangleShape2D_5vmv2")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1362058575]
 sprite_frames = SubResource("SpriteFrames_5vmv2")
-animation = &"idle"
-frame_progress = 0.9071109
+animation = &"moving"
 
 [node name="Timers" type="Node" parent="." unique_id=1149763760]
 
 [node name="JumpBufferTimer" type="Timer" parent="Timers" unique_id=1469793793]
-wait_time = 0.1
 one_shot = true
 
 [node name="DashDurationTimer" type="Timer" parent="Timers" unique_id=1429618969]
@@ -147,6 +150,29 @@ metadata/_edit_group_ = true
 shape = SubResource("CircleShape2D_38sbo")
 
 [node name="RayCast2D" type="RayCast2D" parent="." unique_id=332126038]
+
+[node name="PlayerFsm" type="Node" parent="." unique_id=1551194206 node_paths=PackedStringArray("PlayerAnimation", "InitialState")]
+script = ExtResource("6_0owmy")
+PlayerAnimation = NodePath("../AnimatedSprite2D")
+InitialState = NodePath("Idle")
+metadata/_custom_type_script = "uid://nsabphpnk0j8"
+
+[node name="Idle" type="Node" parent="PlayerFsm" unique_id=1113184528]
+script = ExtResource("7_0owmy")
+metadata/_custom_type_script = "uid://dudnoht825vg4"
+
+[node name="Moving" type="Node" parent="PlayerFsm" unique_id=175542971]
+script = ExtResource("8_qek5x")
+metadata/_custom_type_script = "uid://ctau5codu5u4i"
+
+[node name="Jumping" type="Node" parent="PlayerFsm" unique_id=2036193412]
+script = ExtResource("9_5gtgg")
+metadata/_custom_type_script = "uid://d1rn4p0hkv37u"
+
+[node name="Falling" type="Node" parent="PlayerFsm" unique_id=1197974064 node_paths=PackedStringArray("_jumpBufferTimer")]
+script = ExtResource("10_h17s1")
+_jumpBufferTimer = NodePath("../../Timers/JumpBufferTimer")
+metadata/_custom_type_script = "uid://dhpkrl0hy33j5"
 
 [connection signal="timeout" from="Timers/DashDurationTimer" to="." method="OnDashDurationTimeout"]
 [connection signal="timeout" from="Timers/FreeFallingTimer" to="." method="OnFreeFallingTimerTimeout"]

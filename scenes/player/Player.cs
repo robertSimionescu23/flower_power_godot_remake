@@ -21,9 +21,11 @@ public partial class Player : CharacterBody2D
     [Export]
     public float Speed = 300.0f;
     [Export]
-    public float DirectionChangeSpeed = 50f;
-    [Export]
     public float JumpVelocity = -400.0f;
+    [Export]
+    public float DirectionChangeSpeed = 50f;
+    // [Export]
+    // public float JumpVelocity = -400.0f;
     [Export]
     public float DashStrength = 800f;
     [Export]
@@ -31,6 +33,8 @@ public partial class Player : CharacterBody2D
 
     [Export]
     public float GroundPoundStrength = 1600f;
+
+    public PlayerFsm MovementFSM;
 
 
     public int Direction;
@@ -71,64 +75,66 @@ public partial class Player : CharacterBody2D
 
         _attackZone = GetNode<Area2D>("AttackShape");
         _groundPoundRay = GetNode<RayCast2D>("RayCast2D");
+
+        MovementFSM = GetNode<PlayerFsm>("PlayerFsm");
     }
 
-    public Vector2 HandleGravity(double delta, Vector2 velocity)
-    {
-        if (PlayerState is State.Jumping or State.Falling or State.Idle or State.Moving)
-        {
-            velocity  += GetGravity() * (float)delta;
-            velocity.Y = Mathf.Clamp(velocity.Y, JumpVelocity, -JumpVelocity);
-        }
-        return velocity;
-    }
+    // public Vector2 HandleGravity(double delta, Vector2 velocity)
+    // {
+    //     if (PlayerState is State.Jumping or State.Falling or State.Idle or State.Moving)
+    //     {
+    //         velocity  += GetGravity() * (float)delta;
+    //         velocity.Y = Mathf.Clamp(velocity.Y, -400f, 400f); //Handle Gravity in States
+    //     }
+    //     return velocity;
+    // }
 
-    public float HandleJump(float YVelocity)
-    {
-        if (PlayerState is State.Idle or State.Moving)
-        {
-            if (Input.IsActionJustPressed("jump"))
-            {
-                _jumpBufferTimer.Start();
-            }
+    // public float HandleJump(float YVelocity)
+    // {
+    //     if (PlayerState is State.Idle or State.Moving)
+    //     {
+    //         if (Input.IsActionJustPressed("jump"))
+    //         {
+    //             _jumpBufferTimer.Start();
+    //         }
 
-            if (IsOnFloor() && _jumpBufferTimer.TimeLeft > 0)
-            {
-                PlayerState = State.Jumping;
-                return JumpVelocity;
-            }
-        }
+    //         if (IsOnFloor() && _jumpBufferTimer.TimeLeft > 0)
+    //         {
+    //             PlayerState = State.Jumping;
+    //             return JumpVelocity;
+    //         }
+    //     }
 
-        if (PlayerState is State.Jumping && Input.IsActionJustReleased("jump") && YVelocity < 0){
-            return YVelocity /= 5;
-        }
+    //     if (PlayerState is State.Jumping && Input.IsActionJustReleased("jump") && YVelocity < 0){
+    //         return YVelocity /= 5;
+    //     }
 
-        if(PlayerState is State.Idle or State.Jumping or State.Moving && YVelocity > 0)
-            PlayerState = State.Falling;
+    //     if(PlayerState is State.Idle or State.Jumping or State.Moving && YVelocity > 0)
+    //         PlayerState = State.Falling;
 
-        if (PlayerState is State.Idle or State.Moving && YVelocity < 0)
-            PlayerState = State.Jumping;
+    //     if (PlayerState is State.Idle or State.Moving && YVelocity < 0)
+    //         PlayerState = State.Jumping;
 
-        if(PlayerState is State.Falling && IsOnFloor()){
-            PlayerState = State.Idle;
-        }
+    //     if(PlayerState is State.Falling && IsOnFloor()){
+    //         PlayerState = State.Idle;
+    //     }
 
-        if(PlayerState is State.Falling)
-        {
-            if(_freeFallingTimer.IsStopped() && !IsFreeFalling){
-                IsFreeFalling = false;
-                _freeFallingTimer.Start();
-            }
-        }
-        else
-        {
-            IsFreeFalling = false;
-            if(_freeFallingTimer.TimeLeft > 0)
-                _freeFallingTimer.Stop();
-        }
+    //     if(PlayerState is State.Falling)
+    //     {
+    //         if(_freeFallingTimer.IsStopped() && !IsFreeFalling){
+    //             IsFreeFalling = false;
+    //             _freeFallingTimer.Start();
+    //         }
+    //     }
+    //     else
+    //     {
+    //         IsFreeFalling = false;
+    //         if(_freeFallingTimer.TimeLeft > 0)
+    //             _freeFallingTimer.Stop();
+    //     }
 
-        return YVelocity;
-    }
+    //     return YVelocity;
+    // }
 
 
     public void HandleDashInput()
@@ -222,13 +228,13 @@ public partial class Player : CharacterBody2D
             //While on wall, keep going
             if (_canClimb){
                 PlayerState = State.WallTraversing;
-                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity);
+                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, -400f);
             }
             //if off wall, stop
             else
             {
                 PlayerState = State.Idle;
-                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity / 2);
+                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, -400f / 2);
             }
         }
 
@@ -242,7 +248,7 @@ public partial class Player : CharacterBody2D
             if (IsOnCeilingOnly())
             {
                 PlayerState = State.CeillingTraversing;
-                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, JumpVelocity);
+                return new Vector2(_lastPositiveDirectionUsed * WallTraversingSpeed, -400f);
             }
             else
             {
@@ -298,59 +304,59 @@ public partial class Player : CharacterBody2D
     }
 
 
-    public float HandleHorizontalMovement(float XVelocity)
-    {
-        if (PlayerState is State.Moving or State.Idle or State.Falling or State.Jumping)
-        {
-            if (Input.IsActionPressed("move_right"))
-            {
-                Direction = 1;
-                _lastPositiveDirectionUsed = 1;
-                if(PlayerState is State.Idle  && XVelocity != 0)
-                    PlayerState = State.Moving;
-                AnimatedSprite.FlipH = false;
-            }
-            else if (Input.IsActionPressed("move_left"))
-            {
-                Direction = -1;
-                _lastPositiveDirectionUsed = -1;
-                if(PlayerState is State.Idle && XVelocity != 0)
-                    PlayerState = State.Moving;
-                AnimatedSprite.FlipH = true;
-            }
-            else
-            {
-                Direction = 0;
-                if(PlayerState is State.Moving)
-                    PlayerState = State.Idle;
-            }
+    // public float HandleHorizontalMovement(float XVelocity)
+    // {
+    //     if (PlayerState is State.Moving or State.Idle or State.Falling or State.Jumping)
+    //     {
+    //         if (Input.IsActionPressed("move_right"))
+    //         {
+    //             Direction = 1;
+    //             _lastPositiveDirectionUsed = 1;
+    //             if(PlayerState is State.Idle  && XVelocity != 0)
+    //                 PlayerState = State.Moving;
+    //             AnimatedSprite.FlipH = false;
+    //         }
+    //         else if (Input.IsActionPressed("move_left"))
+    //         {
+    //             Direction = -1;
+    //             _lastPositiveDirectionUsed = -1;
+    //             if(PlayerState is State.Idle && XVelocity != 0)
+    //                 PlayerState = State.Moving;
+    //             AnimatedSprite.FlipH = true;
+    //         }
+    //         else
+    //         {
+    //             Direction = 0;
+    //             if(PlayerState is State.Moving)
+    //                 PlayerState = State.Idle;
+    //         }
 
-            if (Direction != 0)
-                return Direction * Speed;
-            else if (Direction == 0)
-                return Mathf.MoveToward(XVelocity, 0, DirectionChangeSpeed);
-        }
+    //         if (Direction != 0)
+    //             return Direction * Speed;
+    //         else if (Direction == 0)
+    //             return Mathf.MoveToward(XVelocity, 0, DirectionChangeSpeed);
+    //     }
 
-        return XVelocity;
-    }
+    //     return XVelocity;
+    // }
 
-    public void HandleAnimations()
-    {
-        string animation = PlayerState switch
-        {
-            State.Idle    => "idle",
-            State.Moving  => "running",
-            State.Jumping => "jump",
-            State.Falling => "fall",
-            _ => ""
-        };
+    // public void HandleAnimations()
+    // {
+    //     string animation = PlayerState switch
+    //     {
+    //         State.Idle    => "idle",
+    //         State.Moving  => "running",
+    //         State.Jumping => "jump",
+    //         State.Falling => "fall",
+    //         _ => ""
+    //     };
 
-        if (!string.IsNullOrEmpty(animation) &&
-            AnimatedSprite.Animation != animation)
-        {
-            AnimatedSprite.Play(animation);
-        }
-    }
+    //     if (!string.IsNullOrEmpty(animation) &&
+    //         AnimatedSprite.Animation != animation)
+    //     {
+    //         AnimatedSprite.Play(animation);
+    //     }
+    // }
 
     public void HandleAttack()
     {
@@ -376,11 +382,11 @@ public partial class Player : CharacterBody2D
 
     public Vector2 HandleMovement(double delta, Vector2 velocity)
     {
-        velocity   = HandleGravity(delta, velocity);
+        // velocity   = HandleGravity(delta, velocity);
         velocity   = HandleDash   (velocity);
         velocity   = HandleGroundPound  (velocity);
-        velocity.Y = HandleJump   (velocity.Y);
-        velocity.X = HandleHorizontalMovement(velocity.X);
+        // velocity.Y = HandleJump   (velocity.Y);
+        // velocity.X = HandleHorizontalMovement(velocity.X);
 
         return velocity;
     }
@@ -428,7 +434,7 @@ public partial class Player : CharacterBody2D
 
         // GD.Print(PlayerState);
 
-        HandleAnimations();
+        // HandleAnimations();
     }
 
     private void OnFreeFallingTimerTimeout()
