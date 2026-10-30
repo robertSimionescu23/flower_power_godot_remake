@@ -8,10 +8,8 @@ public partial class BaseState : Node
 
     [Export]
     public Player player ;
-    public override void _Ready()
-    {
-        player = (Player)GetTree().GetNodesInGroup("Player")[0];
-    }
+
+    public bool TransitionAllowed = true;
 
     public virtual void Exit()
     {

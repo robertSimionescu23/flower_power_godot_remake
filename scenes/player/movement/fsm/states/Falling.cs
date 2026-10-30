@@ -4,8 +4,12 @@ using Godot;
 public partial class Falling : PlayerState
 {
 
-    [Export]
     private Timer _jumpBufferTimer;
+
+    public override void  _Ready()
+    {
+        _jumpBufferTimer = GetNode<Timer>("JumpBufferTimer");
+    }
 
     public void CheckForJump()
     {
@@ -23,12 +27,22 @@ public partial class Falling : PlayerState
     //TODO: Implement the free falling timer
     public override void Update(double delta)
     {
-        HandleMovement();
-        CheckForJump();
+        if(player == null)
+        {
+            GD.PrintErr("Player is null!");
+            return;
+        }
         if(player.IsOnFloor() && !Input.IsActionPressed("move_right") && !Input.IsActionPressed("move_left"))
             EmitSignal(BaseState.SignalName.Transitioned, this, "idle");
+        else if(player.IsOnFloor() && (Input.IsActionPressed("move_right") || Input.IsActionPressed("move_left")))
+            EmitSignal(BaseState.SignalName.Transitioned, this, "moving");
         else if(player.IsOnFloor())
             EmitSignal(BaseState.SignalName.Transitioned, this, "moving");
+        else if(Input.IsActionJustPressed("dash"))
+             EmitSignal(BaseState.SignalName.Transitioned, this, "dashing");
+
+        HandleMovement();
+        CheckForJump();
         HandleGravity(delta);
     }
 }

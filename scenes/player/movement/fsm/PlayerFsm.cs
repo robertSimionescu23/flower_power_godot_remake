@@ -15,14 +15,19 @@ public partial class PlayerFsm : Node
     private BaseState InitialState;
     private Player player;
 
+    [Export]
+    private bool _stateDebug = false;
+
     public override void _Ready()
     {
         CurrState = InitialState;
-        player = (Player)GetTree().GetNodesInGroup("Player")[0];
+        player = GetTree().GetFirstNodeInGroup("Player") as Player;
 
         foreach(BaseState child in GetChildren().OfType<BaseState>())
         {
             States.Add(child.Name.ToString().ToLower(), child);
+
+            child.player = player;
 
             //connect each FSM state Transitioned signal to the handler defined here
             child.Connect(BaseState.SignalName.Transitioned,
@@ -36,15 +41,32 @@ public partial class PlayerFsm : Node
     public void HandleTransition(BaseState state, string newStateName)
     {
 
-        // GD.Print("Transition attempt to " + newStateName + " while state is " + CurrState.Name);
+        if(_stateDebug) GD.Print("Transition attempt: from " + state.Name.ToString().ToLower() + " to " + newStateName );
 
         if (state != CurrState)
+        {
+            if(_stateDebug) GD.Print("Transition not successfull: calling state is not current state");
             return;
+        }
 
         var newState = States[newStateName.ToLower()];
 
-        if(newState == null)
+        if(newState == null){
+            if(_stateDebug) GD.Print("Transition not successfull: new state is not defined");
             return;
+        }
+
+        if(newState == state){
+            if(_stateDebug) GD.Print("Transition not successfull: same state for destination and source");
+            return;
+        }
+
+        if(!newState.TransitionAllowed){
+            if(_stateDebug) GD.Print("Transition not successfull: transition not allowed now");
+            return;
+        }
+
+        if(_stateDebug) GD.Print("Transition successfull");
 
         CurrState.Exit();
 
@@ -62,9 +84,9 @@ public partial class PlayerFsm : Node
             PlayerAnimation.FlipH = false;
 
         if (CurrState != null &&
-            PlayerAnimation.Animation != animation)
+            PlayerAnimation.Animation != animation &&
+            PlayerAnimation.SpriteFrames.GetAnimationNames().Contains(animation))
         {
-            GD.Print("Animation now is " + animation);
             PlayerAnimation.Play(animation);
         }
     }

@@ -15,6 +15,14 @@ public partial class Idle : PlayerState
         else if (player.IsOnFloor() && Input.IsActionJustPressed("jump"))
             EmitSignal(BaseState.SignalName.Transitioned, this, "jumping");
 
+        else if(Input.IsActionJustPressed("dash"))
+             EmitSignal(BaseState.SignalName.Transitioned, this, "dashing");
+
+        else if(player.Velocity.Y > 0){
+            EmitSignal(BaseState.SignalName.Transitioned, this, "falling");
+        }
+
+
         HandleGravity(delta);
     }
 }

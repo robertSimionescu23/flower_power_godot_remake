@@ -1,19 +1,22 @@
 using Godot;
 public  partial class PlayerState: BaseState{
     //Used to hold methods for common actions
+
+    public bool CanClimb = false;
+    public bool CanDash = true;
     public void HandleMovement()
     {
             if (Input.IsActionPressed("move_right"))
             {
                 // Direction = 1;
-                // _lastPositiveDirectionUsed = 1;
+                player.LastPositiveDirectionUsed = 1;
                 player.Velocity = new Vector2(player.Speed, player.Velocity.Y);
                 // AnimatedSprite.FlipH = false;
             }
             else if (Input.IsActionPressed("move_left"))
             {
                 // Direction = -1;
-                // _lastPositiveDirectionUsed = -1;
+                player.LastPositiveDirectionUsed = -1;
                 player.Velocity = new Vector2(-player.Speed, player.Velocity.Y);
                 // AnimatedSprite.FlipH = true;
             }
@@ -29,6 +32,9 @@ public  partial class PlayerState: BaseState{
         newVelocity  += player.GetGravity() * (float)delta;
         newVelocity.Y = Mathf.Clamp(newVelocity.Y, -400f, 400f); //Handle Gravity in States
 
+
         player.Velocity = newVelocity;
     }
+
+
 }

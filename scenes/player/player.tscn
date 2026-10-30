@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://ctau5codu5u4i" path="res://scenes/player/movement/fsm/states/Moving.cs" id="8_qek5x"]
 [ext_resource type="Script" uid="uid://d1rn4p0hkv37u" path="res://scenes/player/movement/fsm/states/Jumping.cs" id="9_5gtgg"]
 [ext_resource type="Script" uid="uid://dhpkrl0hy33j5" path="res://scenes/player/movement/fsm/states/Falling.cs" id="10_h17s1"]
+[ext_resource type="Script" uid="uid://c4xv1e43f4i2u" path="res://scenes/player/movement/fsm/states/Dashing.cs" id="11_je7p5"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5vmv2"]
 size = Vector2(16, 32)
@@ -111,27 +112,11 @@ animation = &"moving"
 
 [node name="Timers" type="Node" parent="." unique_id=1149763760]
 
-[node name="JumpBufferTimer" type="Timer" parent="Timers" unique_id=1469793793]
-one_shot = true
-
-[node name="DashDurationTimer" type="Timer" parent="Timers" unique_id=1429618969]
-wait_time = 0.1
-one_shot = true
-
 [node name="FreeFallingTimer" type="Timer" parent="Timers" unique_id=1887751345]
 wait_time = 0.3
 one_shot = true
 
-[node name="DashCoolDownTimer" type="Timer" parent="Timers" unique_id=1040883868]
-wait_time = 0.5
-one_shot = true
-
 [node name="AttackBufferTimer" type="Timer" parent="Timers" unique_id=2124058192]
-wait_time = 0.1
-one_shot = true
-
-[node name="GroundPoundActivationTimer" type="Timer" parent="Timers" unique_id=2059733066]
-wait_time = 0.1
 one_shot = true
 
 [node name="WallClingBufferTimer" type="Timer" parent="Timers" unique_id=671465324]
@@ -155,6 +140,7 @@ shape = SubResource("CircleShape2D_38sbo")
 script = ExtResource("6_0owmy")
 PlayerAnimation = NodePath("../AnimatedSprite2D")
 InitialState = NodePath("Idle")
+_stateDebug = true
 metadata/_custom_type_script = "uid://nsabphpnk0j8"
 
 [node name="Idle" type="Node" parent="PlayerFsm" unique_id=1113184528]
@@ -169,13 +155,29 @@ metadata/_custom_type_script = "uid://ctau5codu5u4i"
 script = ExtResource("9_5gtgg")
 metadata/_custom_type_script = "uid://d1rn4p0hkv37u"
 
-[node name="Falling" type="Node" parent="PlayerFsm" unique_id=1197974064 node_paths=PackedStringArray("_jumpBufferTimer")]
+[node name="Falling" type="Node" parent="PlayerFsm" unique_id=1197974064]
 script = ExtResource("10_h17s1")
-_jumpBufferTimer = NodePath("../../Timers/JumpBufferTimer")
 metadata/_custom_type_script = "uid://dhpkrl0hy33j5"
 
-[connection signal="timeout" from="Timers/DashDurationTimer" to="." method="OnDashDurationTimeout"]
+[node name="JumpBufferTimer" type="Timer" parent="PlayerFsm/Falling" unique_id=1469793793]
+one_shot = true
+
+[node name="Dashing" type="Node" parent="PlayerFsm" unique_id=1581868206 node_paths=PackedStringArray("_attackBufferTimer")]
+script = ExtResource("11_je7p5")
+_attackBufferTimer = NodePath("../../Timers/AttackBufferTimer")
+metadata/_custom_type_script = "uid://c4xv1e43f4i2u"
+
+[node name="DashDurationTimer" type="Timer" parent="PlayerFsm/Dashing" unique_id=1429618969]
+wait_time = 0.2
+one_shot = true
+
+[node name="DashCoolDownTimer" type="Timer" parent="PlayerFsm/Dashing" unique_id=1040883868]
+wait_time = 0.1
+one_shot = true
+
 [connection signal="timeout" from="Timers/FreeFallingTimer" to="." method="OnFreeFallingTimerTimeout"]
 [connection signal="timeout" from="Timers/AttackBufferTimer" to="." method="AttackBufferTimeout"]
-[connection signal="timeout" from="Timers/GroundPoundActivationTimer" to="." method="OnGroundPoundActivationTimeout"]
+[connection signal="timeout" from="Timers/AttackBufferTimer" to="PlayerFsm/Dashing" method="OnAttackBufferTimeout"]
 [connection signal="body_entered" from="AttackShape" to="." method="OnAttackShapeEntered"]
+[connection signal="timeout" from="PlayerFsm/Falling/JumpBufferTimer" to="." method="OnJumpBufferTimeout"]
+[connection signal="timeout" from="PlayerFsm/Dashing/DashDurationTimer" to="PlayerFsm/Dashing" method="OnDashDurationTimeout"]
