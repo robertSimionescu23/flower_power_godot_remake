@@ -98,9 +98,9 @@ public partial class Dashing: PlayerState
 
         GD.Print("Dash stopped!");
 
-        if(Input.IsActionPressed("move_right") || Input.IsActionPressed("move_left"))
-            EmitSignal(BaseState.SignalName.Transitioned, this, "moving");
-        else
+        // if(Input.IsActionPressed("move_right") || Input.IsActionPressed("move_left"))
+        //     EmitSignal(BaseState.SignalName.Transitioned, this, "moving");
+        // else
             EmitSignal(BaseState.SignalName.Transitioned, this, "idle");
     }
 

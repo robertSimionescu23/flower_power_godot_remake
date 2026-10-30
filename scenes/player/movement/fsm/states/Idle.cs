@@ -9,7 +9,7 @@ public partial class Idle : PlayerState
     }
     public override void Update(double delta)
     {
-        if(Input.IsActionJustPressed("move_right") || Input.IsActionJustPressed("move_left"))
+        if(Input.IsActionPressed("move_right") || Input.IsActionPressed("move_left"))
             EmitSignal(BaseState.SignalName.Transitioned, this, "moving");
 
         else if (player.IsOnFloor() && Input.IsActionJustPressed("jump"))
