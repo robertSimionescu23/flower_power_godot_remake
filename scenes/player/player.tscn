@@ -140,7 +140,6 @@ shape = SubResource("CircleShape2D_38sbo")
 script = ExtResource("6_0owmy")
 PlayerAnimation = NodePath("../AnimatedSprite2D")
 InitialState = NodePath("Idle")
-_stateDebug = true
 metadata/_custom_type_script = "uid://nsabphpnk0j8"
 
 [node name="Idle" type="Node" parent="PlayerFsm" unique_id=1113184528]
@@ -160,6 +159,7 @@ script = ExtResource("10_h17s1")
 metadata/_custom_type_script = "uid://dhpkrl0hy33j5"
 
 [node name="JumpBufferTimer" type="Timer" parent="PlayerFsm/Falling" unique_id=1469793793]
+wait_time = 0.2
 one_shot = true
 
 [node name="Dashing" type="Node" parent="PlayerFsm" unique_id=1581868206 node_paths=PackedStringArray("_attackBufferTimer")]

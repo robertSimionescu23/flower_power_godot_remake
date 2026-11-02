@@ -5,7 +5,6 @@ public partial class Dashing: PlayerState
 {
     private Timer _dashCooldownTimer;
     private Timer _dashDurationTimer;
-    private bool _dashAvailable = true;
     private bool _upDash  = false;
 
     [Export]
@@ -23,6 +22,7 @@ public partial class Dashing: PlayerState
 
     public override void Enter()
     {
+        Attack();
         _dashDurationTimer.Start();
         _upDash = Input.IsActionPressed("move_up");
     }
@@ -31,6 +31,7 @@ public partial class Dashing: PlayerState
     {
         _dashDurationTimer.Stop();
         _dashCooldownTimer.Start();
+        _attackBufferTimer.Start();
     }
     public override void _Ready()
     {
@@ -39,69 +40,50 @@ public partial class Dashing: PlayerState
         _dashDurationTimer = GetNode<Timer>("DashDurationTimer");
     }
 
+    public void ChangeState(string state)
+    {
+        EmitSignal(BaseState.SignalName.Transitioned, this, state);
+        _dashDurationTimer.Stop();
+        _attackBufferTimer.Start();
+    }
+
     public override void Update(double delta)
     {
-        if (_upDash)
-            player.Velocity = new Vector2(0, -player.DashStrength);
-        else
-            player.Velocity =  new Vector2(player.LastPositiveDirectionUsed * player.DashStrength, 0);
+        base.Update(delta);
+        var isColliding = player.IsOnWall() || player.IsOnCeiling();
 
-        _dashAvailable = false;
+        if(_dashCooldownTimer.IsStopped()){
+            if (_upDash)
+                player.Velocity = new Vector2(0, -player.DashStrength);
+            else
+                player.Velocity =  new Vector2(player.LastPositiveDirectionUsed * player.DashStrength, 0);
+
+            if (isColliding)
+            {
+                if(GetSpecialCollisionAngle()!= null)
+                    ChangeState("climbing");
+                else
+                    ChangeState("idle");
+            }
+
+
+
+        TransitionAllowed = false;
+        }
     }
 
-    public override void _Process(double delta)
+    public override void _PhysicsProcess(double delta)
     {
         //dash is available if the player is grounded and the cooldown has passed
-        if(player.IsOnFloor() && _dashCooldownTimer.IsStopped())
-            _dashAvailable = true;
-
-        TransitionAllowed = _dashAvailable && (!player.IsOnWallOnly() || CheckIfTouchingClimableWall() || _upDash);
-
-        //can dash if: has dash available and either of:
-        //1) is touching no wall
-        //2) is touchhing a climbale wall
-        //3) is updashing (ignores if it's touching walls)
+        if(player.IsOnFloor())
+            TransitionAllowed = true;
     }
 
-    public bool CheckIfTouchingClimableWall()
-    {
-        var _touchingClimbableWall = false;
 
-        for (int i = 0; i < player.GetSlideCollisionCount(); i++)
-        {
-            var collision          = player.GetSlideCollision(i);
-            var collidedObject     = collision.GetCollider(); //Get the object player collided with
-
-            if(collidedObject is not TileMapLayer tilemap)
-                continue;
-
-            var collisionPosGlobal = collision.GetPosition() - collision.GetNormal() * 3.0f; //Check slightly closer to cell center to avoid duds
-            var collisionPosLocal  = tilemap.ToLocal(collisionPosGlobal);
-            var cell               = tilemap.LocalToMap(collisionPosLocal);
-            var tileData           = tilemap.GetCellTileData(cell);
-
-            if(tileData == null)
-                continue;
-
-            if(tileData.GetCustomData("isClimbable").AsBool())
-            {
-                _touchingClimbableWall = true;
-                break;
-            }
-        }
-        return _touchingClimbableWall;
-    }
 
     public void OnDashDurationTimeout()
     {
-        _attackBufferTimer.Start();
-
-        GD.Print("Dash stopped!");
-
-        // if(Input.IsActionPressed("move_right") || Input.IsActionPressed("move_left"))
-        //     EmitSignal(BaseState.SignalName.Transitioned, this, "moving");
-        // else
-            EmitSignal(BaseState.SignalName.Transitioned, this, "idle");
+        EmitSignal(BaseState.SignalName.Transitioned, this, "idle");
     }
 
     public void OnAttackBufferTimeout()

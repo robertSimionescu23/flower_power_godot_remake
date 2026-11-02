@@ -21,9 +21,7 @@ public  partial class PlayerState: BaseState{
                 // AnimatedSprite.FlipH = true;
             }
             else
-            {
                 player.Velocity = new Vector2(0, player.Velocity.Y); //TODO: Involve direction change speed in this
-            }
         }
 
     public void HandleGravity(double delta)
@@ -35,6 +33,48 @@ public  partial class PlayerState: BaseState{
 
         player.Velocity = newVelocity;
     }
+
+
+    public float? GetSpecialCollisionAngle()
+    {
+        for (int i = 0; i < player.GetSlideCollisionCount(); i++)
+        {
+            var collision          = player.GetSlideCollision(i);
+            var collidedObject     = collision.GetCollider(); //Get the object player collided with
+
+            if(collidedObject is not TileMapLayer tilemap)
+                return null;
+
+            var collisionPosGlobal = collision.GetPosition() - collision.GetNormal() * 3.0f; //Check slightly closer to cell center to avoid duds
+            var collisionPosLocal  = tilemap.ToLocal(collisionPosGlobal);
+            var cell               = tilemap.LocalToMap(collisionPosLocal);
+            var tileData           = tilemap.GetCellTileData(cell);
+
+            if(tileData == null)
+                return null;
+
+            if(tileData.GetCustomData("isClimbable").AsBool())
+                return Mathf.RadToDeg(collision.GetAngle());
+        }
+
+        return null;
+
+    }
+
+
+
+    public override void Update(double delta)
+    {
+        if(player == null)
+        {
+            GD.PrintErr("Player is null!");
+            return;
+        }
+
+
+        player.MoveAndSlide();
+    }
+
 
 
 }

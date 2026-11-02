@@ -414,15 +414,16 @@ public partial class Player : CharacterBody2D
 
     public override void _PhysicsProcess(double delta)
     {
-        Vector2 velocity = Velocity;
+        // Vector2 velocity = Velocity;
 
-        velocity = HandleMovement(delta, velocity);
+        // velocity = HandleMovement(delta, velocity);
 
-        // HandleAttack();
+        // // HandleAttack();
 
-        Velocity = velocity;
+        // Velocity = velocity;
 
-        MoveAndSlide();
+        // GD.Print("Collision count: ", GetSlideCollisionCount());
+        // GD.Print("Is on wall: ", IsOnWall());
 
         // GD.Print(PlayerState);
 
