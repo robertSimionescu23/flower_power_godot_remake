@@ -5,19 +5,19 @@ public partial class Idle : PlayerState
 {
     public override void Enter()
     {
-        player.Velocity = new Vector2(0,0); //Make the stop smoother in update
+        Player.Velocity = new Vector2(0,0); //Make the stop smoother in update
     }
     public override void Update(double delta)
     {
 
         if(Input.IsActionPressed("move_right") || Input.IsActionPressed("move_left"))
-            EmitSignal(BaseState.SignalName.Transitioned, this, "moving");
+            EmitSignal(PlayerState.SignalName.Transitioned, this, "moving");
 
-        else if (player.IsOnFloor() && Input.IsActionJustPressed("jump"))
-            EmitSignal(BaseState.SignalName.Transitioned, this, "jumping");
+        else if (Player.IsOnFloor() && Input.IsActionJustPressed("jump"))
+            EmitSignal(PlayerState.SignalName.Transitioned, this, "jumping");
 
-        else if(player.Velocity.Y > 0)
-            EmitSignal(BaseState.SignalName.Transitioned, this, "falling");
+        else if(Player.Velocity.Y > 0)
+            EmitSignal(PlayerState.SignalName.Transitioned, this, "falling");
 
 
         HandleGravity(delta);

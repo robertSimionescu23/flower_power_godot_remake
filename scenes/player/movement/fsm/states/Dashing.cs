@@ -12,7 +12,7 @@ public partial class Dashing: PlayerState
 
     private void Attack()
     {
-        var attackZone = player.AttackZone;
+        var attackZone = Player.AttackZone;
 
         attackZone.Visible    = true;
         attackZone.Monitoring = true;
@@ -42,7 +42,7 @@ public partial class Dashing: PlayerState
 
     public void ChangeState(string state)
     {
-        EmitSignal(BaseState.SignalName.Transitioned, this, state);
+        EmitSignal(PlayerState.SignalName.Transitioned, this, state);
         _dashDurationTimer.Stop();
         _attackBufferTimer.Start();
     }
@@ -50,45 +50,46 @@ public partial class Dashing: PlayerState
     public override void Update(double delta)
     {
         base.Update(delta);
-        var isColliding = player.IsOnWall() || player.IsOnCeiling();
+        var isColliding = Player.IsOnWall() || Player.IsOnCeiling();
 
         if(_dashCooldownTimer.IsStopped()){
             if (_upDash)
-                player.Velocity = new Vector2(0, -player.DashStrength);
+                Player.Velocity = new Vector2(0, -Player.DashStrength);
             else
-                player.Velocity =  new Vector2(player.LastPositiveDirectionUsed * player.DashStrength, 0);
+                Player.Velocity =  new Vector2(Player.LastPositiveDirectionUsed * Player.DashStrength, 0);
 
             if (isColliding)
             {
-                if(GetSpecialCollisionAngle()!= null)
-                    ChangeState("climbing");
+                var specialCollisionAngle = GetSpecialCollisionAngle();
+                if(specialCollisionAngle!= null)
+                    if(specialCollisionAngle == 90)
+                        ChangeState("wallclimbing");
+                    else if(specialCollisionAngle == 180)
+                        ChangeState("ceillingclimbing");
                 else
                     ChangeState("idle");
             }
-
-
-
-        TransitionAllowed = false;
+        CanTransitionToState = false;
         }
     }
 
     public override void _PhysicsProcess(double delta)
     {
-        //dash is available if the player is grounded and the cooldown has passed
-        if(player.IsOnFloor())
-            TransitionAllowed = true;
+        //dash is available if the Player is grounded and the cooldown has passed
+        if(Player.IsOnFloor())
+            CanTransitionToState = true;
     }
 
 
 
     public void OnDashDurationTimeout()
     {
-        EmitSignal(BaseState.SignalName.Transitioned, this, "idle");
+        EmitSignal(PlayerState.SignalName.Transitioned, this, "idle");
     }
 
     public void OnAttackBufferTimeout()
     {
-        var attackZone = player.AttackZone;
+        var attackZone = Player.AttackZone;
 
         attackZone.Visible    = false;
         attackZone.Monitoring = false;

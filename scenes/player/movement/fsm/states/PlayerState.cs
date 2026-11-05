@@ -1,46 +1,64 @@
 using Godot;
-public  partial class PlayerState: BaseState{
+public  partial class PlayerState: Node{
     //Used to hold methods for common actions
 
     public bool CanClimb = false;
     public bool CanDash = true;
+
+    [Signal]
+    public delegate void TransitionedEventHandler(PlayerState stateCalling, string newStateName);
+
+    [Export]
+    public Player Player ;
+
+    public bool CanTransitionToState = true;
+
+    public virtual void Exit()
+    {
+        return;
+    }
+    public virtual void Enter()
+    {
+        return;
+    }
+
     public void HandleMovement()
     {
             if (Input.IsActionPressed("move_right"))
             {
                 // Direction = 1;
-                player.LastPositiveDirectionUsed = 1;
-                player.Velocity = new Vector2(player.Speed, player.Velocity.Y);
+                Player.LastPositiveDirectionUsed = 1;
+                Player.Velocity = new Vector2(Player.Speed, Player.Velocity.Y);
                 // AnimatedSprite.FlipH = false;
             }
             else if (Input.IsActionPressed("move_left"))
             {
                 // Direction = -1;
-                player.LastPositiveDirectionUsed = -1;
-                player.Velocity = new Vector2(-player.Speed, player.Velocity.Y);
+                Player.LastPositiveDirectionUsed = -1;
+                Player.Velocity = new Vector2(-Player.Speed, Player.Velocity.Y);
                 // AnimatedSprite.FlipH = true;
             }
             else
-                player.Velocity = new Vector2(0, player.Velocity.Y); //TODO: Involve direction change speed in this
+                Player.Velocity = new Vector2(0, Player.Velocity.Y); //TODO: Involve direction change speed in this
         }
 
     public void HandleGravity(double delta)
     {
-        var newVelocity = player.Velocity;
-        newVelocity  += player.GetGravity() * (float)delta;
+        var newVelocity = Player.Velocity;
+        newVelocity  += Player.GetGravity() * (float)delta;
         newVelocity.Y = Mathf.Clamp(newVelocity.Y, -400f, 400f); //Handle Gravity in States
 
 
-        player.Velocity = newVelocity;
+        Player.Velocity = newVelocity;
     }
 
 
     public float? GetSpecialCollisionAngle()
     {
-        for (int i = 0; i < player.GetSlideCollisionCount(); i++)
+        for (int i = 0; i < Player.GetSlideCollisionCount(); i++)
         {
-            var collision          = player.GetSlideCollision(i);
-            var collidedObject     = collision.GetCollider(); //Get the object player collided with
+            var collision          = Player.GetSlideCollision(i);
+            var collidedObject     = collision.GetCollider(); //Get the object Player collided with
 
             if(collidedObject is not TileMapLayer tilemap)
                 return null;
@@ -61,18 +79,15 @@ public  partial class PlayerState: BaseState{
 
     }
 
-
-
-    public override void Update(double delta)
+    public virtual void Update(double delta)
     {
-        if(player == null)
+        if(Player == null)
         {
             GD.PrintErr("Player is null!");
             return;
         }
 
-
-        player.MoveAndSlide();
+        Player.MoveAndSlide();
     }
 
 

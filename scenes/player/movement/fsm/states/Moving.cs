@@ -8,13 +8,13 @@ public partial class Moving : PlayerState
 
 
         if(!Input.IsActionPressed("move_right") && !Input.IsActionPressed("move_left"))
-            EmitSignal(BaseState.SignalName.Transitioned, this, "idle");
+            EmitSignal(PlayerState.SignalName.Transitioned, this, "idle");
 
-        else if (player.IsOnFloor() && Input.IsActionJustPressed("jump"))
-            EmitSignal(BaseState.SignalName.Transitioned, this, "jumping");
+        else if (Player.IsOnFloor() && Input.IsActionJustPressed("jump"))
+            EmitSignal(PlayerState.SignalName.Transitioned, this, "jumping");
 
-        else if(player.Velocity.Y > 0)
-            EmitSignal(BaseState.SignalName.Transitioned, this, "falling");
+        else if(Player.Velocity.Y > 0)
+            EmitSignal(PlayerState.SignalName.Transitioned, this, "falling");
 
         HandleMovement();
         HandleGravity(delta);

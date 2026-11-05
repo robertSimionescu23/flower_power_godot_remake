@@ -6,20 +6,22 @@ public partial class Jumping : PlayerState
 
     public override void Enter()
     {
-        player.Velocity = new Vector2 (player.Velocity.X, player.JumpVelocity);
+        Player.Velocity = new Vector2 (Player.Velocity.X, Player.JumpVelocity);
     }
 
     public override void Update(double delta)
     {
+        if(!Player.GroundPoundRay.IsColliding() && Input.IsActionJustPressed("pound"))
+            EmitSignal(PlayerState.SignalName.Transitioned, this, "groundpound");
 
-        if(Input.IsActionJustPressed("dash"))
-            EmitSignal(BaseState.SignalName.Transitioned, this, "dashing");
+        else if(Input.IsActionJustPressed("dash"))
+            EmitSignal(PlayerState.SignalName.Transitioned, this, "dashing");
 
-        if (Input.IsActionJustReleased("jump") && player.Velocity.Y < 0)
-            player.Velocity = new Vector2 (player.Velocity.X, player.Velocity.Y / 5);
+        else if (Input.IsActionJustReleased("jump") && Player.Velocity.Y < 0)
+            Player.Velocity = new Vector2 (Player.Velocity.X, Player.Velocity.Y / 5);
 
-        else if(player.Velocity.Y >= 0)
-            EmitSignal(BaseState.SignalName.Transitioned, this, "falling");
+        else if(Player.Velocity.Y >= 0)
+            EmitSignal(PlayerState.SignalName.Transitioned, this, "falling");
 
 
         HandleMovement();

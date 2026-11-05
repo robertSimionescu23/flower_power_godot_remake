@@ -5,15 +5,15 @@ using Godot;
 [GlobalClass]
 public partial class PlayerFsm : Node
 {
-    private Dictionary<string, BaseState> States = new Dictionary<string, BaseState>();
+    private Dictionary<string, PlayerState> States = new Dictionary<string, PlayerState>();
     [Export]
-    private BaseState CurrState {set; get;}
+    private PlayerState CurrState {set; get;}
     [Export]
     public AnimatedSprite2D PlayerAnimation;
 
     [Export]
-    private BaseState InitialState;
-    private Player player;
+    private PlayerState InitialState;
+    private Player Player;
 
     [Export]
     private bool _stateDebug = false;
@@ -21,24 +21,25 @@ public partial class PlayerFsm : Node
     public override void _Ready()
     {
         CurrState = InitialState;
-        player = GetTree().GetFirstNodeInGroup("Player") as Player;
+        Player = GetTree().GetFirstNodeInGroup("Player") as Player;
+        Player.State = CurrState;
 
-        foreach(BaseState child in GetChildren().OfType<BaseState>())
+        foreach(PlayerState child in GetChildren().OfType<PlayerState>())
         {
             States.Add(child.Name.ToString().ToLower(), child);
 
-            child.player = player;
+            child.Player = Player;
 
             //connect each FSM state Transitioned signal to the handler defined here
-            child.Connect(BaseState.SignalName.Transitioned,
-                          Callable.From<BaseState, string>(HandleTransition)
+            child.Connect(PlayerState.SignalName.Transitioned,
+                          Callable.From<PlayerState, string>(HandleTransition)
             );
 
         }
 
     }
 
-    public void HandleTransition(BaseState state, string newStateName)
+    public void HandleTransition(PlayerState state, string newStateName)
     {
 
         if(_stateDebug) GD.Print("Transition attempt: from " + state.Name.ToString().ToLower() + " to " + newStateName );
@@ -61,7 +62,7 @@ public partial class PlayerFsm : Node
             return;
         }
 
-        if(!newState.TransitionAllowed){
+        if(!newState.CanTransitionToState){
             if(_stateDebug) GD.Print("Transition not successfull: transition not allowed now");
             return;
         }
@@ -73,14 +74,15 @@ public partial class PlayerFsm : Node
         newState.Enter();
 
         CurrState = newState;
+        Player.State = CurrState;
     }
 
      public void HandleAnimations()
     {
         var animation = CurrState.Name.ToString().ToLower();
-        if(player.Velocity.X < 0)
+        if(Player.Velocity.X < 0)
             PlayerAnimation.FlipH = true;
-        else if (player.Velocity.X > 0)
+        else if (Player.Velocity.X > 0)
             PlayerAnimation.FlipH = false;
 
         if (CurrState != null &&
