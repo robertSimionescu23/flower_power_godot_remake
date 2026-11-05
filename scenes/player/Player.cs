@@ -35,9 +35,6 @@ public partial class Player : CharacterBody2D
 
     public RayCast2D GroundPoundRay;
 
-    private Timer _freeFallingTimer;
-    private Timer _wallClingBufferTimer;
-
     public PlayerState State;
 
     private bool _canClimb = false;
@@ -48,8 +45,7 @@ public partial class Player : CharacterBody2D
         AnimatedSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
         AnimatedSprite.Play();
 
-        _freeFallingTimer               = GetNode<Timer>("Timers/FreeFallingTimer");
-        _wallClingBufferTimer           = GetNode<Timer>("Timers/WallClingBufferTimer");
+        // _wallClingBufferTimer           = GetNode<Timer>("Timers/WallClingBufferTimer");
 
         AttackZone = GetNode<Area2D>("AttackShape");
         GroundPoundRay = GetNode<RayCast2D>("RayCast2D");

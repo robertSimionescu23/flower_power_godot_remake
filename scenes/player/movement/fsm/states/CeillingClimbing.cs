@@ -3,6 +3,7 @@ using Godot;
 [GlobalClass]
 public partial class CeillingClimbing: PlayerState
 {
+    //TODO: Add attack to this
     public override void Update(double delta)
     {
         base.Update(delta);
