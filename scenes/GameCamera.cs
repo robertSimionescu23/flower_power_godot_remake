@@ -112,9 +112,7 @@ public partial class GameCamera : Camera2D
                 Mathf.Clamp(distance/_maxDistance, 0f, 1f)
             );
 
-            if(_player.PlayerState is State.GroundPound)
-                _followSpeed = -_player.Velocity.Y;
-
+            //TODO: add camera movement based on state
             Position = Position.MoveToward(_targetPos, _followSpeed * (float)delta);
         }
 
