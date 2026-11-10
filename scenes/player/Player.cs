@@ -9,6 +9,8 @@ public partial class Player : CharacterBody2D
     [Export]
     public float Speed = 300.0f;
     [Export]
+    public float WallJumpStrength = 300f;
+    [Export]
     public float JumpVelocity = -400.0f;
     [Export]
     public float DirectionChangeSpeed = 50f;

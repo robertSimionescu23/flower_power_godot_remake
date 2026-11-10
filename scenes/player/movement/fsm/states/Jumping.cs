@@ -11,6 +11,8 @@ public partial class Jumping : PlayerState
 
     public override void Update(double delta)
     {
+        base.Update(delta);
+
         if(!Player.GroundPoundRay.IsColliding() && Input.IsActionJustPressed("pound"))
             EmitSignal(PlayerState.SignalName.Transitioned, this, "groundpound");
 
@@ -26,6 +28,5 @@ public partial class Jumping : PlayerState
 
         HandleMovement();
         HandleGravity(delta);
-        base.Update(delta);
     }
 }

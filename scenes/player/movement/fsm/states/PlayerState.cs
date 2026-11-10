@@ -11,6 +11,8 @@ public  partial class PlayerState: Node{
     [Export]
     public Player Player ;
 
+    public string LowerCaseName;
+
     public bool CanTransitionToState = true;
 
     public virtual void Exit()
@@ -22,25 +24,30 @@ public  partial class PlayerState: Node{
         return;
     }
 
+    public override void _Ready()
+    {
+        LowerCaseName = Name.ToString().ToLower();
+    }
+
     public void HandleMovement()
     {
-            if (Input.IsActionPressed("move_right"))
-            {
-                // Direction = 1;
-                Player.LastPositiveDirectionUsed = 1;
-                Player.Velocity = new Vector2(Player.Speed, Player.Velocity.Y);
-                // AnimatedSprite.FlipH = false;
-            }
-            else if (Input.IsActionPressed("move_left"))
-            {
-                // Direction = -1;
-                Player.LastPositiveDirectionUsed = -1;
-                Player.Velocity = new Vector2(-Player.Speed, Player.Velocity.Y);
-                // AnimatedSprite.FlipH = true;
-            }
-            else
-                Player.Velocity = new Vector2(0, Player.Velocity.Y); //TODO: Involve direction change speed in this
+        if (Input.IsActionPressed("move_right"))
+        {
+            // Direction = 1;
+            Player.LastPositiveDirectionUsed = 1;
+            Player.Velocity = new Vector2(Player.Speed, Player.Velocity.Y);
+            // AnimatedSprite.FlipH = false;
         }
+        else if (Input.IsActionPressed("move_left"))
+        {
+            // Direction = -1;
+            Player.LastPositiveDirectionUsed = -1;
+            Player.Velocity = new Vector2(-Player.Speed, Player.Velocity.Y);
+            // AnimatedSprite.FlipH = true;
+        }
+        else
+            Player.Velocity = new Vector2(0, Player.Velocity.Y); //TODO: Involve direction change speed in this
+    }
 
     public void HandleGravity(double delta)
     {

@@ -75,8 +75,7 @@ public partial class Dashing: PlayerState
 
     public override void _PhysicsProcess(double delta)
     {
-        //dash is available if the Player is grounded and the cooldown has passed
-        if(Player.IsOnFloor())
+        if(Player.IsOnFloor() || Player.State.LowerCaseName == "wallclimbing" || Player.State.LowerCaseName == "ceillingclimbing")
             CanTransitionToState = true;
     }
 

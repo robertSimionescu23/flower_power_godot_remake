@@ -17,6 +17,8 @@ public partial class PlayerFsm : Node
 
     [Export]
     private bool _stateDebug = false;
+    [Export]
+    private bool _transitionDebug = false;
 
     public override void _Ready()
     {
@@ -41,33 +43,32 @@ public partial class PlayerFsm : Node
 
     public void HandleTransition(PlayerState state, string newStateName)
     {
-
-        if(_stateDebug) GD.Print("Transition attempt: from " + state.Name.ToString().ToLower() + " to " + newStateName );
+        if(_transitionDebug) GD.Print("Transition attempt: from " + state.Name.ToString().ToLower() + " to " + newStateName );
 
         if (state != CurrState)
         {
-            if(_stateDebug) GD.Print("Transition not successfull: calling state is not current state");
+            if(_transitionDebug) GD.Print("Transition not successfull: calling state is not current state");
             return;
         }
 
         var newState = States[newStateName.ToLower()];
 
         if(newState == null){
-            if(_stateDebug) GD.Print("Transition not successfull: new state is not defined");
+            if(_transitionDebug) GD.Print("Transition not successfull: new state is not defined");
             return;
         }
 
         if(newState == state){
-            if(_stateDebug) GD.Print("Transition not successfull: same state for destination and source");
+            if(_transitionDebug) GD.Print("Transition not successfull: same state for destination and source");
             return;
         }
 
         if(!newState.CanTransitionToState){
-            if(_stateDebug) GD.Print("Transition not successfull: transition not allowed now");
+            if(_transitionDebug) GD.Print("Transition not successfull: transition not allowed now");
             return;
         }
 
-        if(_stateDebug) GD.Print("Transition successfull");
+        if(_transitionDebug) GD.Print("Transition successfull");
 
         CurrState.Exit();
 
@@ -75,6 +76,10 @@ public partial class PlayerFsm : Node
 
         CurrState = newState;
         Player.State = CurrState;
+
+        if(_stateDebug)
+            GD.Print("Current state: " + CurrState.Name);
+
     }
 
      public void HandleAnimations()
@@ -97,6 +102,5 @@ public partial class PlayerFsm : Node
     {
         CurrState?.Update(delta);
         HandleAnimations();
-        // GD.Print(CurrState.Name);
     }
 }
