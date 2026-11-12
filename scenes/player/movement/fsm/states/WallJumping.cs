@@ -2,7 +2,7 @@ using Godot;
 
 [GlobalClass]
 public partial class WallJumping: PlayerState
-{
+{//TODO: Change so that you can move after a timer
     public override void Enter()
     {
         Player.Velocity = new Vector2(Player.GetWallNormal().X * Player.WallJumpStrength, 0);
