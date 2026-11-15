@@ -39,20 +39,26 @@ public partial class Player : CharacterBody2D
 
     public PlayerState State;
 
-    private bool _canClimb = false;
-    private bool _upDash   = false;
-
 
     public override void _Ready(){
         AnimatedSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
         AnimatedSprite.Play();
 
-        // _wallClingBufferTimer           = GetNode<Timer>("Timers/WallClingBufferTimer");
-
         AttackZone = GetNode<Area2D>("AttackShape");
         GroundPoundRay = GetNode<RayCast2D>("RayCast2D");
 
         MovementFSM = GetNode<PlayerFsm>("PlayerFsm");
+    }
+
+    //TODO: make damage do knock back
+    public void GetDamaged()
+    {
+        GD.Print("Ouch");
+    }
+
+    public void OnAttackShapeEntered(Node2D enemy)
+    {
+        GD.Print(enemy.Name);
     }
 
 }
