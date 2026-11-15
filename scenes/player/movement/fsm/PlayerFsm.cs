@@ -20,6 +20,7 @@ public partial class PlayerFsm : Node
     [Export]
     private bool _transitionDebug = false;
 
+
     public override void _Ready()
     {
         CurrState = InitialState;

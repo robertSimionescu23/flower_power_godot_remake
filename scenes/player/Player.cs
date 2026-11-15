@@ -26,10 +26,8 @@ public partial class Player : CharacterBody2D
 
 
     public int Direction;
-    public bool _canMove = true;
 
     public bool IsFreeFalling;
-    private bool _canDash = true;
 
     public int LastPositiveDirectionUsed = 1;
 
@@ -39,26 +37,46 @@ public partial class Player : CharacterBody2D
 
     public PlayerState State;
 
+    public bool CanMove = true;
+
+    public Timer KnockBackTimer;
+
 
     public override void _Ready(){
         AnimatedSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
         AnimatedSprite.Play();
 
-        AttackZone = GetNode<Area2D>("AttackShape");
-        GroundPoundRay = GetNode<RayCast2D>("RayCast2D");
+        AttackZone      = GetNode<Area2D>("AttackShape");
+        GroundPoundRay  = GetNode<RayCast2D>("RayCast2D");
+        KnockBackTimer  = GetNode<Timer>("./Timers/KnockBackTimer");
 
         MovementFSM = GetNode<PlayerFsm>("PlayerFsm");
     }
 
     //TODO: make damage do knock back
-    public void GetDamaged()
+    public void GetDamaged(Vector2 knockBackDirection)
     {
-        GD.Print("Ouch");
+        CanMove = false;
+
+        KnockBackTimer.Start();
+
+        var knockBackVelocity = 600f * knockBackDirection;
+        Velocity = knockBackVelocity;
     }
 
     public void OnAttackShapeEntered(Node2D enemy)
     {
         GD.Print(enemy.Name);
+    }
+
+
+   public override void _PhysicsProcess(double delta)
+    {
+        if(!CanMove)
+            if(IsOnFloor() && KnockBackTimer.IsStopped()){
+                CanMove = true;
+                Velocity = new Vector2(0,0);
+            }
     }
 
 }

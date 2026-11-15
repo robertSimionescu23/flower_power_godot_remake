@@ -6,7 +6,6 @@ public partial class Moving : PlayerState
     public override void Update(double delta)
     {
 
-
         if(!Input.IsActionPressed("move_right") && !Input.IsActionPressed("move_left"))
             EmitSignal(PlayerState.SignalName.Transitioned, this, "idle");
 

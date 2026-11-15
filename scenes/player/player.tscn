@@ -117,6 +117,10 @@ animation = &"moving"
 
 [node name="Timers" type="Node" parent="." unique_id=1149763760]
 
+[node name="KnockBackTimer" type="Timer" parent="Timers" unique_id=202202909]
+wait_time = 0.1
+one_shot = true
+
 [node name="AttackBufferTimer" type="Timer" parent="Timers" unique_id=2124058192]
 wait_time = 0.2
 one_shot = true
@@ -198,6 +202,7 @@ metadata/_custom_type_script = "uid://rc5eb2kbj7nk"
 script = ExtResource("15_fcs02")
 metadata/_custom_type_script = "uid://cvuamb7h1kssn"
 
+[connection signal="timeout" from="Timers/KnockBackTimer" to="." method="OnKnockBackTimerTimeout"]
 [connection signal="timeout" from="Timers/AttackBufferTimer" to="." method="AttackBufferTimeout"]
 [connection signal="timeout" from="Timers/AttackBufferTimer" to="PlayerFsm/Dashing" method="OnAttackBufferTimeout"]
 [connection signal="body_entered" from="AttackShape" to="." method="OnAttackShapeEntered"]

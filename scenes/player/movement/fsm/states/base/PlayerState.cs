@@ -31,22 +31,21 @@ public  partial class PlayerState: Node{
 
     public void HandleMovement()
     {
-        if (Input.IsActionPressed("move_right"))
+        if (Player.CanMove)
         {
-            // Direction = 1;
-            Player.LastPositiveDirectionUsed = 1;
-            Player.Velocity = new Vector2(Player.Speed, Player.Velocity.Y);
-            // AnimatedSprite.FlipH = false;
+            if (Input.IsActionPressed("move_right"))
+            {
+                Player.LastPositiveDirectionUsed = 1;
+                Player.Velocity = new Vector2(Player.Speed, Player.Velocity.Y);
+            }
+            else if (Input.IsActionPressed("move_left"))
+            {
+                Player.LastPositiveDirectionUsed = -1;
+                Player.Velocity = new Vector2(-Player.Speed, Player.Velocity.Y);
+            }
+            else
+               Player.Velocity = new Vector2(0, Player.Velocity.Y); //TODO: Involve direction change speed in this
         }
-        else if (Input.IsActionPressed("move_left"))
-        {
-            // Direction = -1;
-            Player.LastPositiveDirectionUsed = -1;
-            Player.Velocity = new Vector2(-Player.Speed, Player.Velocity.Y);
-            // AnimatedSprite.FlipH = true;
-        }
-        else
-            Player.Velocity = new Vector2(0, Player.Velocity.Y); //TODO: Involve direction change speed in this
     }
 
     public void HandleGravity(double delta)
@@ -92,6 +91,11 @@ public  partial class PlayerState: Node{
             GD.PrintErr("Player is null!");
             return;
         }
+
+        //If the player is immobilezed, change state to idle TODO: Decide if a new state is needed for this
+        //TODO: Figure out how to make the idle state change not kill momentum enterily.
+        if(!Player.CanMove)
+            EmitSignal(SignalName.Transitioned, this, "idle");
 
         Player.MoveAndSlide();
     }

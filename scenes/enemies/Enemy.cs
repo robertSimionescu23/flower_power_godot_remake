@@ -23,4 +23,22 @@ public partial class Enemy: CharacterBody2D
         MoveAndSlide();
     }
 
+    public void OnPlayerHit(Node2D body)
+    {
+        Player player = (Player)body;
+        if(!player.AttackZone.Visible){
+
+            var directionToPlayer = GetDirectionToPlayer();
+            Vector2 knockBackDirection = new Vector2(0.5f, -0.5f);
+
+            if (directionToPlayer.X < 0)
+                knockBackDirection.X = -0.5f;
+            if (directionToPlayer.Y > 0.2)
+                knockBackDirection.Y = 0.5f;
+
+            _Player.GetDamaged(knockBackDirection);
+            GD.Print(GetDirectionToPlayer());
+        }
+    }
+
 }

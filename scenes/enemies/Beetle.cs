@@ -46,12 +46,4 @@ public partial class Beetle : Enemy
         Velocity = Move((float)delta);
     }
 
-    public void OnPlayerHit(Node2D body)
-    {
-        Player player = (Player)body;
-        if(!player.AttackZone.Visible){
-            player.GetDamaged();
-            GD.Print(GetDirectionToPlayer());
-        }
-    }
 }
