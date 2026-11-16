@@ -105,7 +105,7 @@ radius = 23.42
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_p47bc")
-GroundPoundStrength = 600.0
+GroundPoundStrength = 1000.0
 metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1838315505]
@@ -127,6 +127,10 @@ one_shot = true
 
 [node name="WallClingBufferTimer" type="Timer" parent="Timers" unique_id=671465324]
 wait_time = 0.2
+one_shot = true
+
+[node name="GraceTimer" type="Timer" parent="Timers" unique_id=1817801745]
+wait_time = 0.5
 one_shot = true
 
 [node name="AttackShape" type="Area2D" parent="." unique_id=1844897492]
@@ -173,9 +177,8 @@ one_shot = true
 wait_time = 0.3
 one_shot = true
 
-[node name="Dashing" type="Node" parent="PlayerFsm" unique_id=1581868206 node_paths=PackedStringArray("_attackBufferTimer")]
+[node name="Dashing" type="Node" parent="PlayerFsm" unique_id=1581868206]
 script = ExtResource("11_je7p5")
-_attackBufferTimer = NodePath("../../Timers/AttackBufferTimer")
 metadata/_custom_type_script = "uid://c4xv1e43f4i2u"
 
 [node name="DashDurationTimer" type="Timer" parent="PlayerFsm/Dashing" unique_id=1429618969]
@@ -203,8 +206,8 @@ script = ExtResource("15_fcs02")
 metadata/_custom_type_script = "uid://cvuamb7h1kssn"
 
 [connection signal="timeout" from="Timers/KnockBackTimer" to="." method="OnKnockBackTimerTimeout"]
-[connection signal="timeout" from="Timers/AttackBufferTimer" to="." method="AttackBufferTimeout"]
-[connection signal="timeout" from="Timers/AttackBufferTimer" to="PlayerFsm/Dashing" method="OnAttackBufferTimeout"]
+[connection signal="timeout" from="Timers/AttackBufferTimer" to="." method="OnAttackBufferTimeout"]
+[connection signal="timeout" from="Timers/GraceTimer" to="." method="GraceTimerTimeout"]
 [connection signal="body_entered" from="AttackShape" to="." method="OnAttackShapeEntered"]
 [connection signal="timeout" from="PlayerFsm/Falling/JumpBufferTimer" to="." method="OnJumpBufferTimeout"]
 [connection signal="timeout" from="PlayerFsm/Falling/FreeFallingTimer" to="PlayerFsm/Falling" method="OnFreeFallingTimerTimeout"]

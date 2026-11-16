@@ -4,14 +4,18 @@ using System;
 public partial class Beetle : Enemy
 {
 
-
     public RayCast2D GroundCheck;
     public RayCast2D WallCheck;
+    public Timer KnockBackTimer;
+    [Export]
+    private float _knockBackStrength = 400f;
+
     public override void _Ready()
     {
         base._Ready();
-        GroundCheck = GetNode<RayCast2D>("GroundCheck");
-        WallCheck = GetNode<RayCast2D>("WallCheck");
+        GroundCheck     = GetNode<RayCast2D>("GroundCheck");
+        WallCheck       = GetNode<RayCast2D>("WallCheck");
+        KnockBackTimer  = GetNode<Timer>("KnockBackTimer");
     }
 
     public void ChangeDirection()
@@ -23,10 +27,9 @@ public partial class Beetle : Enemy
         Scale = scale;
     }
 
-    public Vector2 Move(float delta){
+    public Vector2 Move(){
         Vector2 velocity = Velocity;
 
-        velocity  += GetGravity() * (float)delta;
         velocity.Y = Mathf.Clamp(velocity.Y, -400f, 400f);
 
         var canGo = GroundCheck.IsColliding() && IsOnFloor() && !WallCheck.IsColliding();
@@ -37,13 +40,37 @@ public partial class Beetle : Enemy
             ChangeDirection();
 
         return velocity;
-
     }
 
     public override void _PhysicsProcess(double delta)
     {
         base._PhysicsProcess(delta);
-        Velocity = Move((float)delta);
+        if(IsAlive)
+            Velocity = Move();
+
+        else {
+            if(IsOnFloor() && KnockBackTimer.IsStopped())
+                Velocity = new Vector2(0,0);
+        }
+
+        Velocity  += GetGravity() * (float)delta;
     }
 
+    public override void GetHit()
+    {
+        if(IsAlive){
+            IsAlive = false;
+            //TODO: Impelemnt animation
+            var directionToPlayer = GetDirectionToPlayer();
+
+            KnockBackTimer.Start();
+
+            Vector2 knockBackDirection = new Vector2(0.5f, -0.5f);
+
+            if (directionToPlayer.X > 0)
+                knockBackDirection.X = -0.5f;
+
+            Velocity  =  knockBackDirection * _knockBackStrength;
+        }
+    }
 }

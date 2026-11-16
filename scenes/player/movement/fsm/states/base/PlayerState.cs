@@ -54,7 +54,6 @@ public  partial class PlayerState: Node{
         newVelocity  += Player.GetGravity() * (float)delta;
         newVelocity.Y = Mathf.Clamp(newVelocity.Y, -400f, 400f); //Handle Gravity in States
 
-
         Player.Velocity = newVelocity;
     }
 
@@ -83,17 +82,9 @@ public  partial class PlayerState: Node{
 
         return null;
     }
-
     public virtual void Update(double delta)
     {
-        if(Player == null)
-        {
-            GD.PrintErr("Player is null!");
-            return;
-        }
-
         //If the player is immobilezed, change state to idle TODO: Decide if a new state is needed for this
-        //TODO: Figure out how to make the idle state change not kill momentum enterily.
         if(!Player.CanMove)
             EmitSignal(SignalName.Transitioned, this, "idle");
 

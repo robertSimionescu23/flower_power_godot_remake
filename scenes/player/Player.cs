@@ -18,9 +18,12 @@ public partial class Player : CharacterBody2D
     public float DashStrength = 800f;
     [Export]
     public float WallTraversingSpeed = 350f;
-
     [Export]
-    public float GroundPoundStrength = 1600f;
+    public float GroundPoundStrength = 800;
+    [Export]
+    private float _knockBackStrength = 400f;
+
+    private int health = 3;
 
     public PlayerFsm MovementFSM;
 
@@ -38,8 +41,14 @@ public partial class Player : CharacterBody2D
     public PlayerState State;
 
     public bool CanMove = true;
+    public bool isHit   = false;
+    public bool isInvincible = false;
 
     public Timer KnockBackTimer;
+    public Timer GraceTimer;
+    public Timer AttackBufferTimer;
+
+    public Vector2 LastCheckPoint;
 
 
     public override void _Ready(){
@@ -49,34 +58,77 @@ public partial class Player : CharacterBody2D
         AttackZone      = GetNode<Area2D>("AttackShape");
         GroundPoundRay  = GetNode<RayCast2D>("RayCast2D");
         KnockBackTimer  = GetNode<Timer>("./Timers/KnockBackTimer");
+        GraceTimer      = GetNode<Timer>("./Timers/GraceTimer");
+        AttackBufferTimer  = GetNode<Timer>("./Timers/AttackBufferTimer");
 
         MovementFSM = GetNode<PlayerFsm>("PlayerFsm");
     }
 
-    //TODO: make damage do knock back
+    //If hit by enemy(collision with enemy hurtbox while attack is not up), get knocked back and recover once on the ground TODO: Play a animation and a small delay while
     public void GetDamaged(Vector2 knockBackDirection)
     {
-        CanMove = false;
+        if(!isInvincible){
+            CanMove      = false;
+            isHit        = true;
+            isInvincible = true;
 
-        KnockBackTimer.Start();
+            KnockBackTimer.Start();
 
-        var knockBackVelocity = 600f * knockBackDirection;
-        Velocity = knockBackVelocity;
+            var knockBackVelocity = _knockBackStrength * knockBackDirection;
+            Velocity = knockBackVelocity;
+
+            health -= 1;
+
+            if(health <= 0)
+                Respawn();
+        }
     }
 
-    public void OnAttackShapeEntered(Node2D enemy)
+    public void Respawn()
     {
-        GD.Print(enemy.Name);
+        GD.Print("DEAD!");
+        Visible = false;
+        GlobalPosition = LastCheckPoint;
+        Visible = true;
+        health = 3;
+        Velocity = new Vector2(0,0);
     }
 
+    public void OnAttackShapeEntered(Node2D body)
+    {
+        var enemy = body as Enemy;
+        enemy.GetHit();
+    }
 
    public override void _PhysicsProcess(double delta)
     {
-        if(!CanMove)
+        if(isHit)
             if(IsOnFloor() && KnockBackTimer.IsStopped()){
                 CanMove = true;
+                isHit   = false;
                 Velocity = new Vector2(0,0);
+
+                GraceTimer.Start();
             }
+    }
+
+    public void GraceTimerTimeout()
+    {
+        isInvincible = false;
+    }
+
+    public void Attack()
+    {
+        AttackZone.Visible    = true;
+        AttackZone.Monitoring = true;
+
+        AttackBufferTimer.Stop(); //To prevent using the buffer time if the dash started before it ended
+    }
+
+    public void OnAttackBufferTimeout()
+    {
+        AttackZone.Visible    = false;
+        AttackZone.Monitoring = false;
     }
 
 }

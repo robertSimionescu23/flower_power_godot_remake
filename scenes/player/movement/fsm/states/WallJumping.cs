@@ -23,6 +23,5 @@ public partial class WallJumping: PlayerState
             EmitSignal(PlayerState.SignalName.Transitioned, this, "moving");
 
         HandleGravity(delta);
-        // HandleMovement();
     }
 }

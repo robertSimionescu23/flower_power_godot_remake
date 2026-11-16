@@ -5,9 +5,12 @@ public partial class Enemy: CharacterBody2D
     [Export]
     public float Speed = 50.0f;
     public int Direction = -1;
-    public bool isAlive = true;
+    public bool IsAlive = true;
+
 
     Player _Player;
+
+    public virtual void GetHit(){}
 
     public override void _Ready()
     {
@@ -26,7 +29,7 @@ public partial class Enemy: CharacterBody2D
     public void OnPlayerHit(Node2D body)
     {
         Player player = (Player)body;
-        if(!player.AttackZone.Visible){
+        if(!player.AttackZone.Visible && IsAlive){
 
             var directionToPlayer = GetDirectionToPlayer();
             Vector2 knockBackDirection = new Vector2(0.5f, -0.5f);
@@ -37,8 +40,9 @@ public partial class Enemy: CharacterBody2D
                 knockBackDirection.Y = 0.5f;
 
             _Player.GetDamaged(knockBackDirection);
-            GD.Print(GetDirectionToPlayer());
         }
     }
+
+
 
 }

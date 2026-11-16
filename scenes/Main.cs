@@ -30,6 +30,7 @@ public partial class Main : Node2D
         ActiveCamera.GlobalPosition   = CurrLevelInstance.StartLocation;
 
         Player.GlobalPosition = CurrLevelInstance.StartLocation;
+        Player.LastCheckPoint = CurrLevelInstance.StartLocation;
         Player.Visible = true;
     }
 

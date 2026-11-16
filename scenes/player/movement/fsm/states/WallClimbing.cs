@@ -3,11 +3,17 @@ using Godot;
 [GlobalClass]
 public partial class WallClimbing: PlayerState
 {
-    //TODO: Add attack to this
+    public override void Enter()
+    {
+       Player.Attack();
+    }
+    public override void Exit()
+    {
+       Player.AttackBufferTimer.Start();
+    }
     public override void Update(double delta)
     {
         base.Update(delta);
-        //TODO: Implement this
         if (Input.IsActionJustPressed("jump"))
         {
             EmitSignal(PlayerState.SignalName.Transitioned, this, "walljumping");
