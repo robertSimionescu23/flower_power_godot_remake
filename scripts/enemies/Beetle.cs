@@ -61,7 +61,8 @@ public partial class Beetle : Enemy
         if(IsAlive){
             IsAlive = false;
             //TODO: Impelemnt animation
-            var directionToPlayer = GetDirectionToPlayer();
+            var distanceToPlayer = Player.GlobalPosition - GlobalPosition;
+            var directionToPlayer = distanceToPlayer.Normalized();
 
             KnockBackTimer.Start();
 

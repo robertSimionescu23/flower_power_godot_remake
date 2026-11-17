@@ -79,6 +79,7 @@ move_up={
 2d_physics/layer_3="enemies"
 2d_physics/layer_4="grabbableWall"
 2d_physics/layer_5="attacks"
+2d_physics/layer_6="hurt"
 
 [physics]
 

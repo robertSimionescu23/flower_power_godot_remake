@@ -17,6 +17,9 @@
 [ext_resource type="Script" uid="uid://rc5eb2kbj7nk" path="res://scripts/player/movementFSM/states/GroundPound.cs" id="14_ugbui"]
 [ext_resource type="Script" uid="uid://cvuamb7h1kssn" path="res://scripts/player/movementFSM/states/WallJumping.cs" id="15_fcs02"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_38sbo"]
+size = Vector2(18, 34)
+
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5vmv2"]
 size = Vector2(16, 32)
 
@@ -114,8 +117,18 @@ collision_mask = 9
 script = ExtResource("1_p47bc")
 GroundPoundStrength = 1000.0
 
+[node name="HurtBox" type="Area2D" parent="." unique_id=1646698112]
+collision_layer = 0
+collision_mask = 52
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="HurtBox" unique_id=80473753]
+shape = SubResource("RectangleShape2D_38sbo")
+debug_color = Color(0.9453694, 0.07427911, 0.55502284, 0.41960785)
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1838315505]
 shape = SubResource("RectangleShape2D_5vmv2")
+
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=332126038]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1362058575]
 sprite_frames = SubResource("SpriteFrames_5vmv2")
@@ -140,6 +153,7 @@ wait_time = 0.5
 one_shot = true
 
 [node name="AttackHitBox" type="Area2D" parent="." unique_id=1844897492]
+visible = false
 modulate = Color(0.3986292, 0.00010887176, 0.3986263, 1)
 position = Vector2(0, -6)
 collision_layer = 16
@@ -149,8 +163,6 @@ metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitBox" unique_id=1314172250]
 shape = SubResource("CircleShape2D_38sbo")
-
-[node name="RayCast2D" type="RayCast2D" parent="." unique_id=332126038]
 
 [node name="HorizontalClimbHitBox" type="Area2D" parent="." unique_id=1893012929]
 position = Vector2(0, -6)
@@ -231,6 +243,7 @@ metadata/_custom_type_script = "uid://rc5eb2kbj7nk"
 script = ExtResource("15_fcs02")
 metadata/_custom_type_script = "uid://cvuamb7h1kssn"
 
+[connection signal="body_entered" from="HurtBox" to="." method="OnHurtBoxEntered"]
 [connection signal="timeout" from="Timers/KnockBackTimer" to="." method="OnKnockBackTimerTimeout"]
 [connection signal="timeout" from="Timers/AttackBufferTimer" to="." method="OnAttackBufferTimeout"]
 [connection signal="timeout" from="Timers/GraceTimer" to="." method="GraceTimerTimeout"]
