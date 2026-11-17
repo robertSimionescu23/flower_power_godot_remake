@@ -34,7 +34,9 @@ public partial class Player : CharacterBody2D
 
     public int LastPositiveDirectionUsed = 1;
 
-    public Area2D AttackZone;
+    public Area2D AttackHitBox;
+    public Area2D VerticalClimbHitBox;
+    public Area2D HorizontalClimbHitBox;
 
     public RayCast2D GroundPoundRay;
 
@@ -55,11 +57,14 @@ public partial class Player : CharacterBody2D
         AnimatedSprite = GetNode<AnimatedSprite2D>("AnimatedSprite2D");
         AnimatedSprite.Play();
 
-        AttackZone      = GetNode<Area2D>("AttackShape");
+        AttackHitBox      = GetNode<Area2D>("AttackHitBox");
         GroundPoundRay  = GetNode<RayCast2D>("RayCast2D");
         KnockBackTimer  = GetNode<Timer>("./Timers/KnockBackTimer");
         GraceTimer      = GetNode<Timer>("./Timers/GraceTimer");
         AttackBufferTimer  = GetNode<Timer>("./Timers/AttackBufferTimer");
+
+        HorizontalClimbHitBox  = GetNode<Area2D>("HorizontalClimbHitBox");
+        VerticalClimbHitBox     = GetNode<Area2D>("VerticalClimbHitBox");
 
         MovementFSM = GetNode<PlayerFsm>("PlayerFsm");
     }
@@ -114,21 +119,23 @@ public partial class Player : CharacterBody2D
 
     public void GraceTimerTimeout()
     {
+        //TODO: ADD visual clue to this
         isInvincible = false;
     }
 
     public void Attack()
     {
-        AttackZone.Visible    = true;
-        AttackZone.Monitoring = true;
+        AttackHitBox.Visible    = true;
+        AttackHitBox.Monitoring = true;
 
         AttackBufferTimer.Stop(); //To prevent using the buffer time if the dash started before it ended
     }
 
+
     public void OnAttackBufferTimeout()
     {
-        AttackZone.Visible    = false;
-        AttackZone.Monitoring = false;
+        AttackHitBox.Visible    = false;
+        AttackHitBox.Monitoring = false;
     }
 
 }

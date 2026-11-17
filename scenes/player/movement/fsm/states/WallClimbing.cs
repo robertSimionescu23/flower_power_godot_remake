@@ -18,7 +18,7 @@ public partial class WallClimbing: PlayerState
         {
             EmitSignal(PlayerState.SignalName.Transitioned, this, "walljumping");
         }
-        else if(GetSpecialCollisionAngle() == 90){
+        else if(Player.VerticalClimbHitBox.HasOverlappingBodies()){
             Player.Velocity =  new Vector2(Player.LastPositiveDirectionUsed * Player.WallTraversingSpeed, -Player.WallTraversingSpeed);
         }
         else

@@ -44,18 +44,14 @@ public partial class Dashing: PlayerState
             else
                 Player.Velocity =  new Vector2(Player.LastPositiveDirectionUsed * Player.DashStrength, 0);
 
-            if (isColliding){
-                var specialCollisionAngle = GetSpecialCollisionAngle();
-                if(specialCollisionAngle!= null)
-                    if(specialCollisionAngle == 90)
-                        ChangeState("wallclimbing");
-                    else if(specialCollisionAngle == 180)
-                        ChangeState("ceillingclimbing");
-                else
-                    ChangeState("idle");
-            }
-        CanTransitionToState = false;
+            if(Player.VerticalClimbHitBox.HasOverlappingBodies())
+                    ChangeState("wallclimbing");
+            else if(Player.HorizontalClimbHitBox.HasOverlappingBodies())
+                    ChangeState("ceillingclimbing");
+            else if (isColliding) ChangeState("idle");//Stop on hitting a normal wall
         }
+
+        CanTransitionToState = false;
     }
 
     public override void _PhysicsProcess(double delta)

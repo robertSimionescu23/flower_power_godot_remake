@@ -16,7 +16,7 @@ public partial class CeillingClimbing: PlayerState
     {
         if(Input.IsActionJustPressed("pound"))
             EmitSignal(PlayerState.SignalName.Transitioned, this, "groundpound");
-        else if(GetSpecialCollisionAngle() == 180)
+        else if(Player.HorizontalClimbHitBox.HasOverlappingBodies())
             Player.Velocity =  new Vector2(Player.LastPositiveDirectionUsed * Player.WallTraversingSpeed, -Player.WallTraversingSpeed);
         else
             EmitSignal(PlayerState.SignalName.Transitioned, this, "idle");

@@ -29,7 +29,7 @@ public partial class Enemy: CharacterBody2D
     public void OnPlayerHit(Node2D body)
     {
         Player player = (Player)body;
-        if(!player.AttackZone.Visible && IsAlive){
+        if(!player.AttackHitBox.Visible && IsAlive){ //TODO: player.AttackHitBox.Visible is inintuitive - change to a bool or something
 
             var directionToPlayer = GetDirectionToPlayer();
             Vector2 knockBackDirection = new Vector2(0.5f, -0.5f);
