@@ -1,21 +1,21 @@
 [gd_scene format=3 uid="uid://ryeekdqvwsxx"]
 
-[ext_resource type="Script" uid="uid://drilnkwiw4vsx" path="res://scenes/player/Player.cs" id="1_p47bc"]
+[ext_resource type="Script" uid="uid://drilnkwiw4vsx" path="res://scripts/player/Player.cs" id="1_p47bc"]
 [ext_resource type="Texture2D" uid="uid://dwcunltpiexvx" path="res://graphics/player/fall.png" id="2_p47bc"]
 [ext_resource type="Texture2D" uid="uid://by2y4og2ippk4" path="res://graphics/player/run+idle.png" id="3_gmlin"]
 [ext_resource type="Texture2D" uid="uid://dji87vegepupa" path="res://graphics/player/jump.png" id="3_lvxji"]
 [ext_resource type="Texture2D" uid="uid://dh7akf3ef18r2" path="res://graphics/player/idle.png" id="3_p47bc"]
-[ext_resource type="Script" uid="uid://nsabphpnk0j8" path="res://scenes/player/movement/fsm/PlayerFsm.cs" id="6_0owmy"]
-[ext_resource type="Script" uid="uid://duwxlyygf7vwe" path="res://scenes/player/HorizontalsClimbHitBoxs.cs" id="6_myrg7"]
-[ext_resource type="Script" uid="uid://dudnoht825vg4" path="res://scenes/player/movement/fsm/states/Idle.cs" id="7_0owmy"]
-[ext_resource type="Script" uid="uid://ctau5codu5u4i" path="res://scenes/player/movement/fsm/states/Moving.cs" id="8_qek5x"]
-[ext_resource type="Script" uid="uid://d1rn4p0hkv37u" path="res://scenes/player/movement/fsm/states/Jumping.cs" id="9_5gtgg"]
-[ext_resource type="Script" uid="uid://dhpkrl0hy33j5" path="res://scenes/player/movement/fsm/states/Falling.cs" id="10_h17s1"]
-[ext_resource type="Script" uid="uid://c4xv1e43f4i2u" path="res://scenes/player/movement/fsm/states/Dashing.cs" id="11_je7p5"]
-[ext_resource type="Script" uid="uid://dksrhpfeapwmv" path="res://scenes/player/movement/fsm/states/WallClimbing.cs" id="12_fm80t"]
-[ext_resource type="Script" uid="uid://uxt6anpc8wc5" path="res://scenes/player/movement/fsm/states/CeillingClimbing.cs" id="13_gx1jg"]
-[ext_resource type="Script" uid="uid://rc5eb2kbj7nk" path="res://scenes/player/movement/fsm/states/GroundPound.cs" id="14_ugbui"]
-[ext_resource type="Script" uid="uid://cvuamb7h1kssn" path="res://scenes/player/movement/fsm/states/WallJumping.cs" id="15_fcs02"]
+[ext_resource type="Script" uid="uid://nsabphpnk0j8" path="res://scripts/player/movementFSM/PlayerFsm.cs" id="6_0owmy"]
+[ext_resource type="Script" uid="uid://duwxlyygf7vwe" path="res://scripts/player/HorizontalsClimbHitBoxs.cs" id="6_myrg7"]
+[ext_resource type="Script" uid="uid://dudnoht825vg4" path="res://scripts/player/movementFSM/states/Idle.cs" id="7_0owmy"]
+[ext_resource type="Script" uid="uid://ctau5codu5u4i" path="res://scripts/player/movementFSM/states/Moving.cs" id="8_qek5x"]
+[ext_resource type="Script" uid="uid://d1rn4p0hkv37u" path="res://scripts/player/movementFSM/states/Jumping.cs" id="9_5gtgg"]
+[ext_resource type="Script" uid="uid://dhpkrl0hy33j5" path="res://scripts/player/movementFSM/states/Falling.cs" id="10_h17s1"]
+[ext_resource type="Script" uid="uid://c4xv1e43f4i2u" path="res://scripts/player/movementFSM/states/Dashing.cs" id="11_je7p5"]
+[ext_resource type="Script" uid="uid://dksrhpfeapwmv" path="res://scripts/player/movementFSM/states/WallClimbing.cs" id="12_fm80t"]
+[ext_resource type="Script" uid="uid://uxt6anpc8wc5" path="res://scripts/player/movementFSM/states/CeillingClimbing.cs" id="13_gx1jg"]
+[ext_resource type="Script" uid="uid://rc5eb2kbj7nk" path="res://scripts/player/movementFSM/states/GroundPound.cs" id="14_ugbui"]
+[ext_resource type="Script" uid="uid://cvuamb7h1kssn" path="res://scripts/player/movementFSM/states/WallJumping.cs" id="15_fcs02"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5vmv2"]
 size = Vector2(16, 32)
@@ -103,10 +103,10 @@ animations = [{
 radius = 23.42
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pipwu"]
-size = Vector2(25, 13)
+size = Vector2(25, 16)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wv5fr"]
-size = Vector2(15, 32)
+size = Vector2(17, 32)
 
 [node name="Player" type="CharacterBody2D" unique_id=1970844428 groups=["Player"]]
 collision_layer = 2
@@ -158,7 +158,7 @@ collision_layer = 0
 collision_mask = 8
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HorizontalClimbHitBox" unique_id=456720078]
-position = Vector2(-0.5, -16.5)
+position = Vector2(-0.5, -18)
 shape = SubResource("RectangleShape2D_pipwu")
 debug_color = Color(0.82003605, 0.0018072134, 0.96759266, 0.41960785)
 
@@ -169,7 +169,7 @@ collision_mask = 8
 script = ExtResource("6_myrg7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="VerticalClimbHitBox" unique_id=634741784]
-position = Vector2(15.5, 6)
+position = Vector2(16.5, 6)
 shape = SubResource("RectangleShape2D_wv5fr")
 debug_color = Color(0.8228059, 0.4009033, 0.0019562263, 0.41960785)
 
@@ -177,7 +177,6 @@ debug_color = Color(0.8228059, 0.4009033, 0.0019562263, 0.41960785)
 script = ExtResource("6_0owmy")
 PlayerAnimation = NodePath("../AnimatedSprite2D")
 InitialState = NodePath("Idle")
-_stateDebug = true
 metadata/_custom_type_script = "uid://nsabphpnk0j8"
 
 [node name="Idle" type="Node" parent="PlayerFsm" unique_id=1113184528]
