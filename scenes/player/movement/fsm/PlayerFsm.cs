@@ -86,10 +86,12 @@ public partial class PlayerFsm : Node
      public void HandleAnimations()
     {
         var animation = CurrState.Name.ToString().ToLower();
-        if(Player.Velocity.X < 0)
+        if(Player.Velocity.X < 0){
             PlayerAnimation.FlipH = true;
-        else if (Player.Velocity.X > 0)
+        }
+        else if (Player.Velocity.X > 0){
             PlayerAnimation.FlipH = false;
+        }
 
         if (CurrState != null &&
             PlayerAnimation.Animation != animation &&

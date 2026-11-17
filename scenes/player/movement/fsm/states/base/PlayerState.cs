@@ -58,30 +58,6 @@ public  partial class PlayerState: Node{
     }
 
 
-    public float? GetSpecialCollisionAngle()
-    {
-        for (int i = 0; i < Player.GetSlideCollisionCount(); i++)
-        {
-            var collision          = Player.GetSlideCollision(i);
-            var collidedObject     = collision.GetCollider(); //Get the object Player collided with
-
-            if(collidedObject is not TileMapLayer tilemap)
-                return null;
-
-            var collisionPosGlobal = collision.GetPosition() - collision.GetNormal() * 3.0f; //Check slightly closer to cell center to avoid duds
-            var collisionPosLocal  = tilemap.ToLocal(collisionPosGlobal);
-            var cell               = tilemap.LocalToMap(collisionPosLocal);
-            var tileData           = tilemap.GetCellTileData(cell);
-
-            if(tileData == null)
-                return null;
-
-            if(tileData.GetCustomData("isClimbable").AsBool())
-                return Mathf.RadToDeg(collision.GetAngle());
-        }
-
-        return null;
-    }
     public virtual void Update(double delta)
     {
         //If the player is immobilezed, change state to idle TODO: Decide if a new state is needed for this

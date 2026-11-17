@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://dji87vegepupa" path="res://graphics/player/jump.png" id="3_lvxji"]
 [ext_resource type="Texture2D" uid="uid://dh7akf3ef18r2" path="res://graphics/player/idle.png" id="3_p47bc"]
 [ext_resource type="Script" uid="uid://nsabphpnk0j8" path="res://scenes/player/movement/fsm/PlayerFsm.cs" id="6_0owmy"]
+[ext_resource type="Script" uid="uid://duwxlyygf7vwe" path="res://scenes/player/HorizontalsClimbHitBoxs.cs" id="6_myrg7"]
 [ext_resource type="Script" uid="uid://dudnoht825vg4" path="res://scenes/player/movement/fsm/states/Idle.cs" id="7_0owmy"]
 [ext_resource type="Script" uid="uid://ctau5codu5u4i" path="res://scenes/player/movement/fsm/states/Moving.cs" id="8_qek5x"]
 [ext_resource type="Script" uid="uid://d1rn4p0hkv37u" path="res://scenes/player/movement/fsm/states/Jumping.cs" id="9_5gtgg"]
@@ -101,12 +102,17 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_38sbo"]
 radius = 23.42
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pipwu"]
+size = Vector2(25, 13)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wv5fr"]
+size = Vector2(15, 32)
+
 [node name="Player" type="CharacterBody2D" unique_id=1970844428 groups=["Player"]]
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("1_p47bc")
 GroundPoundStrength = 1000.0
-metadata/_edit_group_ = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1838315505]
 shape = SubResource("RectangleShape2D_5vmv2")
@@ -133,8 +139,7 @@ one_shot = true
 wait_time = 0.5
 one_shot = true
 
-[node name="AttackShape" type="Area2D" parent="." unique_id=1844897492]
-visible = false
+[node name="AttackHitBox" type="Area2D" parent="." unique_id=1844897492]
 modulate = Color(0.3986292, 0.00010887176, 0.3986263, 1)
 position = Vector2(0, -6)
 collision_layer = 16
@@ -142,15 +147,37 @@ collision_mask = 4
 monitoring = false
 metadata/_edit_group_ = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackShape" unique_id=1314172250]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitBox" unique_id=1314172250]
 shape = SubResource("CircleShape2D_38sbo")
 
 [node name="RayCast2D" type="RayCast2D" parent="." unique_id=332126038]
+
+[node name="HorizontalClimbHitBox" type="Area2D" parent="." unique_id=1893012929]
+position = Vector2(0, -6)
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HorizontalClimbHitBox" unique_id=456720078]
+position = Vector2(-0.5, -16.5)
+shape = SubResource("RectangleShape2D_pipwu")
+debug_color = Color(0.82003605, 0.0018072134, 0.96759266, 0.41960785)
+
+[node name="VerticalClimbHitBox" type="Area2D" parent="." unique_id=2123102530]
+position = Vector2(0, -6)
+collision_layer = 0
+collision_mask = 8
+script = ExtResource("6_myrg7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="VerticalClimbHitBox" unique_id=634741784]
+position = Vector2(15.5, 6)
+shape = SubResource("RectangleShape2D_wv5fr")
+debug_color = Color(0.8228059, 0.4009033, 0.0019562263, 0.41960785)
 
 [node name="PlayerFsm" type="Node" parent="." unique_id=1551194206 node_paths=PackedStringArray("PlayerAnimation", "InitialState")]
 script = ExtResource("6_0owmy")
 PlayerAnimation = NodePath("../AnimatedSprite2D")
 InitialState = NodePath("Idle")
+_stateDebug = true
 metadata/_custom_type_script = "uid://nsabphpnk0j8"
 
 [node name="Idle" type="Node" parent="PlayerFsm" unique_id=1113184528]
@@ -208,7 +235,7 @@ metadata/_custom_type_script = "uid://cvuamb7h1kssn"
 [connection signal="timeout" from="Timers/KnockBackTimer" to="." method="OnKnockBackTimerTimeout"]
 [connection signal="timeout" from="Timers/AttackBufferTimer" to="." method="OnAttackBufferTimeout"]
 [connection signal="timeout" from="Timers/GraceTimer" to="." method="GraceTimerTimeout"]
-[connection signal="body_entered" from="AttackShape" to="." method="OnAttackShapeEntered"]
+[connection signal="body_entered" from="AttackHitBox" to="." method="OnAttackShapeEntered"]
 [connection signal="timeout" from="PlayerFsm/Falling/JumpBufferTimer" to="." method="OnJumpBufferTimeout"]
 [connection signal="timeout" from="PlayerFsm/Falling/FreeFallingTimer" to="PlayerFsm/Falling" method="OnFreeFallingTimerTimeout"]
 [connection signal="timeout" from="PlayerFsm/Dashing/DashDurationTimer" to="PlayerFsm/Dashing" method="OnDashDurationTimeout"]
