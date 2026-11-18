@@ -48,6 +48,7 @@ public partial class Player : CharacterBody2D
     public bool CanMove = true;
     public bool isHit   = false;
     public bool isInvincible = false;
+    public bool isAttacking  = false;
 
     public Timer KnockBackTimer;
     public Timer GraceTimer;
@@ -119,11 +120,13 @@ public partial class Player : CharacterBody2D
         var attackedDirection =  GlobalPosition - body.GlobalPosition;
         if (body is TileMapLayer)
             GetDamaged(new Vector2(-Velocity.X, -Velocity.Y));
-        else if(body is Enemy enemy)
+        else if(body is Enemy enemy){
             if (!enemy.IsAlive)
                 return;
-            else
-                GetDamaged(attackedDirection.Normalized());
+            if(isAttacking)
+                return;
+            GetDamaged(attackedDirection.Normalized());
+        }
         else
             GetDamaged(attackedDirection.Normalized());
     }
@@ -164,22 +167,18 @@ public partial class Player : CharacterBody2D
 
     public void Attack()
     {
+        isAttacking = true;
         AttackHitBox.Visible    = true;
         AttackHitBox.Monitoring = true;
-
-        //Cannot be hurt while attacking TODO: Change this so that dashing into spikes hurts the player and knocks them out of dash
-        HurtBox.Visible    = false;
-        HurtBox.Monitoring = false;
 
         AttackBufferTimer.Stop(); //To prevent using the buffer time if the dash started before it ended
     }
 
     public void OnAttackBufferTimeout()
     {
+        isAttacking = false;
         AttackHitBox.Visible    = false;
         AttackHitBox.Monitoring = false;
-        HurtBox.Visible    = true;
-        HurtBox.Monitoring = true;
     }
 
 }

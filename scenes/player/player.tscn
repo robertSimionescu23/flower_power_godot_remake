@@ -189,6 +189,7 @@ debug_color = Color(0.8228059, 0.4009033, 0.0019562263, 0.41960785)
 script = ExtResource("6_0owmy")
 PlayerAnimation = NodePath("../AnimatedSprite2D")
 InitialState = NodePath("Idle")
+_stateDebug = true
 metadata/_custom_type_script = "uid://nsabphpnk0j8"
 
 [node name="Idle" type="Node" parent="PlayerFsm" unique_id=1113184528]
